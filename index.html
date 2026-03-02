@@ -1,0 +1,1400 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>CARDANO GALAXY QUEST</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Orbitron:wght@400;700;900&family=Fredoka+One&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{width:100%;height:100%;overflow:hidden;background:#020510;}
+canvas#bg{position:fixed;inset:0;z-index:0;}
+#app{position:fixed;inset:0;z-index:1;}
+
+/* ── SCREENS ── */
+.scr{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;}
+.scr.on{display:flex;}
+
+/* ── TITLE SCREEN ── */
+#titleScr{background:radial-gradient(ellipse 100% 80% at 50% 60%,#0a1a3e 0%,#020510 70%);}
+.title-logo{font-family:'Orbitron',monospace;font-size:clamp(22px,4vw,48px);font-weight:900;
+  background:linear-gradient(135deg,#a78bfa,#60a5fa,#34d399,#fbbf24);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  text-align:center;line-height:1.1;letter-spacing:2px;margin-bottom:8px;text-shadow:none;}
+.title-sub{font-family:'Nunito',sans-serif;font-size:clamp(11px,1.4vw,16px);color:rgba(180,200,255,.65);
+  letter-spacing:3px;text-transform:uppercase;text-align:center;margin-bottom:40px;}
+.char-cards{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;margin-bottom:36px;}
+.char-card{width:160px;border-radius:20px;padding:20px 16px;text-align:center;cursor:pointer;
+  border:2px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);
+  transition:all .3s;position:relative;overflow:hidden;}
+.char-card::before{content:'';position:absolute;inset:0;opacity:0;transition:.3s;border-radius:18px;}
+.char-card:hover,.char-card.sel{transform:translateY(-6px);}
+.char-card.sel{border-color:rgba(167,139,250,.8);box-shadow:0 0 30px rgba(167,139,250,.25);}
+.char-card:hover::before,.char-card.sel::before{opacity:1;}
+.cc-shrimp::before{background:radial-gradient(ellipse at 50% 0%,rgba(251,191,36,.12),transparent 70%);}
+.cc-dolphin::before{background:radial-gradient(ellipse at 50% 0%,rgba(96,165,250,.12),transparent 70%);}
+.cc-whale::before{background:radial-gradient(ellipse at 50% 0%,rgba(52,211,153,.12),transparent 70%);}
+.char-card:hover.cc-shrimp,.char-card.sel.cc-shrimp{border-color:rgba(251,191,36,.7);box-shadow:0 0 24px rgba(251,191,36,.2);}
+.char-card:hover.cc-dolphin,.char-card.sel.cc-dolphin{border-color:rgba(96,165,250,.7);box-shadow:0 0 24px rgba(96,165,250,.2);}
+.char-card:hover.cc-whale,.char-card.sel.cc-whale{border-color:rgba(52,211,153,.7);box-shadow:0 0 24px rgba(52,211,153,.2);}
+.cc-ico{font-size:48px;margin-bottom:10px;display:block;}
+.cc-name{font-family:'Fredoka One',cursive;font-size:18px;color:#fff;margin-bottom:5px;}
+.cc-ada{font-family:'Orbitron',monospace;font-size:11px;font-weight:700;margin-bottom:8px;}
+.cc-shrimp .cc-ada{color:#fbbf24;} .cc-dolphin .cc-ada{color:#60a5fa;} .cc-whale .cc-ada{color:#34d399;}
+.cc-desc{font-family:'Nunito',sans-serif;font-size:10px;color:rgba(255,255,255,.5);line-height:1.5;}
+.start-btn{font-family:'Fredoka One',cursive;font-size:20px;padding:14px 48px;border:none;border-radius:50px;
+  background:linear-gradient(135deg,#a78bfa,#60a5fa);color:#fff;cursor:pointer;
+  box-shadow:0 0 40px rgba(167,139,250,.4);transition:all .25s;letter-spacing:1px;}
+.start-btn:hover{transform:scale(1.06);box-shadow:0 0 60px rgba(167,139,250,.6);}
+.start-btn:disabled{opacity:.4;cursor:default;transform:none;}
+
+/* ── GAME SCREEN ── */
+#gameScr{background:transparent;flex-direction:row;align-items:stretch;justify-content:stretch;}
+canvas#gc{position:absolute;inset:0;z-index:1;cursor:crosshair;}
+
+/* HUD */
+.hud-top{position:absolute;top:0;left:0;right:0;z-index:10;
+  display:flex;align-items:center;gap:10px;padding:10px 14px;
+  background:linear-gradient(180deg,rgba(2,5,16,.95) 0%,transparent 100%);
+  pointer-events:none;}
+.hud-logo{font-family:'Orbitron',monospace;font-size:12px;font-weight:700;
+  background:linear-gradient(135deg,#a78bfa,#60a5fa);-webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;letter-spacing:2px;pointer-events:all;}
+.hud-sep{width:1px;height:24px;background:rgba(255,255,255,.1);}
+.hud-stat{display:flex;flex-direction:column;gap:1px;}
+.hud-stat-lbl{font-family:'Nunito',sans-serif;font-size:7px;color:rgba(255,255,255,.4);
+  letter-spacing:1.5px;text-transform:uppercase;}
+.hud-stat-val{font-family:'Orbitron',monospace;font-size:12px;font-weight:700;}
+.hud-stat-val.gold{color:#fbbf24;} .hud-stat-val.blue{color:#60a5fa;}
+.hud-stat-val.green{color:#34d399;} .hud-stat-val.purple{color:#a78bfa;}
+.hud-xp-bar{flex:1;height:8px;background:rgba(255,255,255,.06);border-radius:4px;
+  overflow:hidden;position:relative;pointer-events:none;}
+.hud-xp-fill{height:100%;border-radius:4px;
+  background:linear-gradient(90deg,#a78bfa,#60a5fa,#34d399);
+  transition:width .6s cubic-bezier(.4,0,.2,1);}
+.hud-xp-lbl{font-family:'Orbitron',monospace;font-size:8px;color:rgba(255,255,255,.5);
+  white-space:nowrap;pointer-events:none;}
+.back-mini{font-family:'Nunito',sans-serif;font-size:10px;font-weight:700;
+  padding:4px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.15);
+  background:rgba(255,255,255,.05);color:rgba(255,255,255,.5);cursor:pointer;
+  transition:.2s;pointer-events:all;flex-shrink:0;}
+.back-mini:hover{border-color:rgba(255,255,255,.4);color:#fff;}
+
+/* BOTTOM HUD */
+.hud-bot{position:absolute;bottom:0;left:0;right:0;z-index:10;
+  display:flex;align-items:flex-end;gap:0;
+  background:linear-gradient(0deg,rgba(2,5,16,.98) 0%,transparent 100%);
+  pointer-events:none;}
+/* GALAXY RANK (left) */
+.galaxy-panel{width:200px;padding:12px 14px;pointer-events:all;flex-shrink:0;}
+.gp-title{font-family:'Orbitron',monospace;font-size:8px;color:rgba(255,255,255,.4);
+  letter-spacing:2px;margin-bottom:8px;text-transform:uppercase;}
+.gp-item{display:flex;align-items:center;gap:7px;margin-bottom:5px;padding:5px 8px;
+  border-radius:8px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);}
+.gp-item.me{background:rgba(167,139,250,.08);border-color:rgba(167,139,250,.25);}
+.gp-rank{font-family:'Orbitron',monospace;font-size:9px;font-weight:700;
+  color:rgba(255,255,255,.35);width:14px;}
+.gp-ico{font-size:14px;}
+.gp-name{font-family:'Nunito',sans-serif;font-size:10px;font-weight:700;color:rgba(255,255,255,.7);flex:1;}
+.gp-item.me .gp-name{color:#a78bfa;}
+.gp-score{font-family:'Orbitron',monospace;font-size:9px;font-weight:700;color:#fbbf24;}
+/* DEL PANEL (center) */
+.del-panel{flex:1;padding:12px 16px;display:flex;flex-direction:column;gap:8px;pointer-events:all;min-width:0;}
+.dp-title{font-family:'Fredoka One',cursive;font-size:14px;color:rgba(255,255,255,.7);margin-bottom:2px;}
+.dp-sel-row{display:flex;gap:8px;align-items:center;}
+.dp-sel{flex:1;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);
+  border-radius:10px;color:#fff;font-family:'Nunito',sans-serif;font-size:11px;
+  font-weight:700;padding:7px 10px;outline:none;cursor:pointer;min-width:0;}
+.dp-sel option{background:#0d1229;color:#fff;}
+.dp-amt{width:90px;background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.3);
+  border-radius:10px;color:#a78bfa;font-family:'Orbitron',monospace;font-size:11px;
+  font-weight:700;padding:7px 9px;outline:none;text-align:right;flex-shrink:0;}
+.dp-slider{width:100%;height:5px;-webkit-appearance:none;appearance:none;
+  border-radius:3px;background:rgba(255,255,255,.08);outline:none;cursor:pointer;}
+.dp-slider::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;
+  border-radius:50%;background:linear-gradient(135deg,#a78bfa,#60a5fa);
+  border:2px solid rgba(255,255,255,.3);box-shadow:0 0 8px rgba(167,139,250,.6);cursor:pointer;}
+.dp-pcts{display:flex;gap:4px;}
+.dp-pct{flex:1;padding:4px 0;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
+  border-radius:7px;color:rgba(255,255,255,.5);font-family:'Orbitron',monospace;
+  font-size:9px;cursor:pointer;transition:.2s;text-align:center;}
+.dp-pct:hover{background:rgba(167,139,250,.2);border-color:rgba(167,139,250,.4);color:#a78bfa;}
+.dp-delegate-btn{padding:9px 0;background:linear-gradient(135deg,#a78bfa,#60a5fa);
+  border:none;border-radius:12px;color:#fff;font-family:'Fredoka One',cursive;
+  font-size:15px;cursor:pointer;transition:.2s;letter-spacing:.5px;width:100%;}
+.dp-delegate-btn:hover{filter:brightness(1.12);transform:scale(1.02);}
+.dp-delegate-btn:disabled{background:rgba(255,255,255,.08);color:rgba(255,255,255,.3);
+  cursor:default;transform:none;filter:none;}
+.dp-mode-btn{padding:3px 9px;font-family:Nunito,sans-serif;font-size:10px;font-weight:700;
+  background:transparent;border:none;color:rgba(255,255,255,.4);cursor:pointer;transition:.2s;}
+.dp-mode-btn.on{background:rgba(167,139,250,.25);color:#a78bfa;}
+.dp-mode-btn:hover:not(.on){background:rgba(255,255,255,.06);color:rgba(255,255,255,.7);}
+/* STATUS PANEL (right) */
+.status-panel{width:220px;padding:12px 14px;pointer-events:all;flex-shrink:0;}
+.sp-title{font-family:'Orbitron',monospace;font-size:8px;color:rgba(255,255,255,.4);
+  letter-spacing:2px;margin-bottom:8px;text-transform:uppercase;}
+.sp-item{border-radius:9px;padding:7px 9px;margin-bottom:5px;border:1px solid;}
+.sp-item.ok{background:rgba(52,211,153,.08);border-color:rgba(52,211,153,.25);}
+.sp-item.warn{background:rgba(251,113,133,.08);border-color:rgba(251,113,133,.25);}
+.sp-item.info{background:rgba(96,165,250,.08);border-color:rgba(96,165,250,.2);}
+.sp-item.caution{background:rgba(251,191,36,.07);border-color:rgba(251,191,36,.22);}
+.sp-head{font-family:'Fredoka One',cursive;font-size:10px;margin-bottom:2px;}
+.sp-item.ok .sp-head{color:#34d399;} .sp-item.warn .sp-head{color:#fb7185;}
+.sp-item.info .sp-head{color:#60a5fa;} .sp-item.caution .sp-head{color:#fbbf24;}
+.sp-desc{font-family:'Nunito',sans-serif;font-size:8px;color:rgba(255,255,255,.45);line-height:1.5;}
+/* current delegations mini */
+.del-mini-list{display:flex;flex-wrap:wrap;gap:3px;margin-top:4px;}
+.del-chip{font-family:'Nunito',sans-serif;font-size:8px;font-weight:700;
+  padding:2px 7px;border-radius:20px;border:1px solid;cursor:pointer;transition:.2s;}
+.del-chip:hover{filter:brightness(1.3);}
+
+/* DREP INFO POPUP */
+.drep-popup{position:absolute;z-index:20;background:rgba(10,16,40,.95);
+  border:1px solid rgba(167,139,250,.3);border-radius:18px;padding:16px 18px;
+  min-width:220px;max-width:260px;backdrop-filter:blur(20px);display:none;
+  box-shadow:0 0 40px rgba(167,139,250,.2);}
+.drep-popup.show{display:block;animation:popUp .2s ease;}
+@keyframes popUp{from{opacity:0;transform:scale(.9) translateY(8px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.dp-pop-name{font-family:'Fredoka One',cursive;font-size:18px;color:#fff;margin-bottom:4px;}
+.dp-pop-type{font-size:9px;font-family:'Orbitron',monospace;font-weight:700;letter-spacing:1.5px;
+  text-transform:uppercase;margin-bottom:10px;}
+.dp-pop-stats{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:10px;}
+.dp-pop-stat{background:rgba(255,255,255,.05);border-radius:8px;padding:6px 8px;}
+.dp-pop-sl{font-size:7px;color:rgba(255,255,255,.4);font-family:'Orbitron',monospace;
+  letter-spacing:1px;text-transform:uppercase;margin-bottom:2px;}
+.dp-pop-sv{font-size:13px;font-weight:700;font-family:'Orbitron',monospace;}
+.dp-pop-sv.green{color:#34d399;} .dp-pop-sv.red{color:#fb7185;}
+.dp-pop-sv.gold{color:#fbbf24;} .dp-pop-sv.blue{color:#60a5fa;}
+/* whale bar */
+.whale-bar-wrap{margin-bottom:10px;}
+.whale-bar-lbl{font-size:8px;color:rgba(255,255,255,.45);font-family:'Nunito',sans-serif;
+  margin-bottom:4px;display:flex;justify-content:space-between;}
+.whale-track{height:7px;background:rgba(255,255,255,.06);border-radius:4px;overflow:hidden;}
+.whale-fill{height:100%;border-radius:4px;transition:width .6s cubic-bezier(.4,0,.2,1);}
+.dp-pop-comment{font-size:9px;color:rgba(255,255,255,.5);font-family:'Nunito',sans-serif;
+  line-height:1.55;border-top:1px solid rgba(255,255,255,.08);padding-top:8px;margin-bottom:10px;}
+.dp-pop-conc-warn{background:rgba(251,113,133,.1);border:1px solid rgba(251,113,133,.3);
+  border-radius:8px;padding:6px 8px;font-size:8px;color:#fb7185;
+  font-family:'Nunito',sans-serif;line-height:1.5;margin-bottom:8px;}
+.dp-pop-sel-btn{width:100%;padding:8px;background:linear-gradient(135deg,#a78bfa,#60a5fa);
+  border:none;border-radius:10px;color:#fff;font-family:'Fredoka One',cursive;
+  font-size:13px;cursor:pointer;transition:.2s;}
+.dp-pop-sel-btn:hover{filter:brightness(1.12);}
+.pop-close{position:absolute;top:10px;right:12px;font-size:16px;cursor:pointer;
+  color:rgba(255,255,255,.35);background:none;border:none;transition:.2s;}
+.pop-close:hover{color:#fff;}
+
+/* VOTE EVENT PANEL */
+.vote-panel{position:absolute;top:60px;right:14px;z-index:15;
+  width:240px;background:rgba(10,16,40,.95);border:1px solid rgba(251,191,36,.3);
+  border-radius:16px;padding:14px;backdrop-filter:blur(16px);display:none;
+  box-shadow:0 0 30px rgba(251,191,36,.15);}
+.vote-panel.show{display:block;animation:slideIn .3s ease;}
+@keyframes slideIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+.vp-title{font-family:'Fredoka One',cursive;font-size:15px;color:#fbbf24;margin-bottom:4px;}
+.vp-sub{font-size:9px;color:rgba(255,255,255,.45);font-family:'Nunito',sans-serif;margin-bottom:12px;}
+.vp-proposal{background:rgba(251,191,36,.07);border:1px solid rgba(251,191,36,.2);
+  border-radius:10px;padding:9px 10px;margin-bottom:10px;}
+.vp-pname{font-family:'Fredoka One',cursive;font-size:12px;color:#fff;margin-bottom:3px;}
+.vp-pdesc{font-size:8px;color:rgba(255,255,255,.5);font-family:'Nunito',sans-serif;
+  line-height:1.5;margin-bottom:6px;}
+.vp-pbudget{font-family:'Orbitron',monospace;font-size:10px;font-weight:700;color:#fbbf24;}
+.vote-bar{height:8px;background:rgba(255,255,255,.06);border-radius:4px;
+  overflow:hidden;margin:6px 0;}
+.vote-yes{height:100%;background:linear-gradient(90deg,#34d399,#60a5fa);
+  border-radius:4px;transition:width 1s cubic-bezier(.4,0,.2,1);}
+.vote-stats{display:flex;justify-content:space-between;font-size:8px;font-family:'Orbitron',monospace;}
+.vote-yes-lbl{color:#34d399;font-weight:700;} .vote-no-lbl{color:#fb7185;}
+.vote-result{text-align:center;padding:8px;border-radius:8px;font-family:'Fredoka One',cursive;font-size:13px;display:none;}
+.vote-result.pass{background:rgba(52,211,153,.15);border:1px solid rgba(52,211,153,.35);color:#34d399;}
+.vote-result.fail{background:rgba(251,113,133,.12);border:1px solid rgba(251,113,133,.3);color:#fb7185;}
+.vote-close{width:100%;margin-top:8px;padding:7px;background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.12);border-radius:9px;color:rgba(255,255,255,.6);
+  font-family:'Nunito',sans-serif;font-size:11px;font-weight:700;cursor:pointer;transition:.2s;}
+.vote-close:hover{background:rgba(255,255,255,.1);color:#fff;}
+
+/* TOAST */
+.gtoast{position:fixed;top:60px;left:50%;transform:translateX(-50%);
+  border-radius:50px;padding:8px 20px;font-family:'Fredoka One',cursive;font-size:14px;
+  z-index:999;display:none;pointer-events:none;white-space:nowrap;}
+.gtoast.ok{background:rgba(52,211,153,.2);border:1px solid rgba(52,211,153,.5);color:#34d399;
+  box-shadow:0 0 30px rgba(52,211,153,.2);}
+.gtoast.warn{background:rgba(251,113,133,.18);border:1px solid rgba(251,113,133,.4);color:#fb7185;
+  box-shadow:0 0 30px rgba(251,113,133,.15);}
+.gtoast.gold{background:rgba(251,191,36,.15);border:1px solid rgba(251,191,36,.4);color:#fbbf24;
+  box-shadow:0 0 30px rgba(251,191,36,.15);}
+.gtoast.show{display:block;animation:toastPop .35s cubic-bezier(.34,1.56,.64,1);}
+@keyframes toastPop{from{opacity:0;transform:translateX(-50%) scale(.8) translateY(-10px)}to{opacity:1;transform:translateX(-50%) scale(1) translateY(0)}}
+
+/* XP LEVEL UP OVERLAY */
+.lvl-up{position:fixed;inset:0;z-index:500;display:none;align-items:center;justify-content:center;
+  background:rgba(0,0,0,.6);backdrop-filter:blur(8px);}
+.lvl-up.show{display:flex;animation:fadeIn .3s ease;}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.lvl-box{text-align:center;animation:lvlPop .5s cubic-bezier(.34,1.56,.64,1);}
+@keyframes lvlPop{from{opacity:0;transform:scale(.5)}to{opacity:1;transform:scale(1)}}
+.lvl-star{font-size:72px;margin-bottom:10px;animation:spin 1s ease;}
+@keyframes spin{from{transform:rotate(-20deg) scale(.5)}to{transform:rotate(5deg) scale(1)}}
+.lvl-title{font-family:'Fredoka One',cursive;font-size:48px;
+  background:linear-gradient(135deg,#fbbf24,#fb923c,#f472b6);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:8px;}
+.lvl-name{font-family:'Orbitron',monospace;font-size:16px;font-weight:700;
+  color:#a78bfa;letter-spacing:3px;margin-bottom:20px;}
+.lvl-cont{font-family:'Fredoka One',cursive;font-size:18px;padding:12px 32px;
+  background:linear-gradient(135deg,#a78bfa,#60a5fa);border:none;border-radius:50px;
+  color:#fff;cursor:pointer;transition:.2s;}
+.lvl-cont:hover{transform:scale(1.05);}
+</style>
+</head>
+<body>
+<canvas id="bg"></canvas>
+<div id="app">
+
+<!-- ══ TITLE SCREEN ══ -->
+<div class="scr on" id="titleScr">
+  <div class="title-logo">🌌 CARDANO<br>GALAXY QUEST</div>
+  <div class="title-sub">ホルダーの委任が、銀河の運命を決める</div>
+  <div class="char-cards">
+    <div class="char-card cc-shrimp" onclick="selChar('shrimp',this)">
+      <span class="cc-ico">🦐</span>
+      <div class="cc-name">エビ</div>
+      <div class="cc-ada">5,000 ADA</div>
+      <div class="cc-desc">少額でも分散委任で銀河に貢献！経験値ボーナス+20%</div>
+    </div>
+    <div class="char-card cc-dolphin" onclick="selChar('dolphin',this)">
+      <span class="cc-ico">🐬</span>
+      <div class="cc-name">イルカ</div>
+      <div class="cc-ada">50,000 ADA</div>
+      <div class="cc-desc">バランス型。分散ボーナスと影響力を両立できる</div>
+    </div>
+    <div class="char-card cc-whale" onclick="selChar('whale',this)">
+      <span class="cc-ico">🐳</span>
+      <div class="cc-name">クジラ</div>
+      <div class="cc-ada">500,000 ADA</div>
+      <div class="cc-desc">大きな影響力。集中委任すると分散化指数が急落！</div>
+    </div>
+  </div>
+  <button class="start-btn" id="startBtn" onclick="startGame()" disabled>キャラクターを選んでスタート！</button>
+</div>
+
+<!-- ══ GAME SCREEN ══ -->
+<div class="scr" id="gameScr">
+  <canvas id="gc"></canvas>
+
+  <!-- TOP HUD -->
+  <div class="hud-top">
+    <div class="hud-logo">CGQ</div>
+    <div class="hud-sep"></div>
+    <div class="hud-stat">
+      <span class="hud-stat-lbl">プレイヤー</span>
+      <span class="hud-stat-val purple" id="hud_char">🐬 イルカ</span>
+    </div>
+    <div class="hud-sep"></div>
+    <div class="hud-stat">
+      <span class="hud-stat-lbl">残りADA</span>
+      <span class="hud-stat-val gold" id="hud_ada">50,000</span>
+    </div>
+    <div class="hud-sep"></div>
+    <div class="hud-stat">
+      <span class="hud-stat-lbl">委任済み</span>
+      <span class="hud-stat-val blue" id="hud_del">0</span>
+    </div>
+    <div class="hud-sep"></div>
+    <div class="hud-stat">
+      <span class="hud-stat-lbl">分散化スコア</span>
+      <span class="hud-stat-val green" id="hud_score">0</span>
+    </div>
+    <div class="hud-sep"></div>
+    <div class="hud-stat" style="min-width:80px">
+      <span class="hud-stat-lbl">Tier</span>
+      <span class="hud-stat-val purple" id="hud_tier">— None</span>
+    </div>
+    <div class="hud-xp-bar">
+      <div class="hud-xp-fill" id="hud_xpfill" style="width:0%"></div>
+    </div>
+    <div class="hud-xp-lbl" id="hud_xplbl">Lv.1 — 0 / 100 XP</div>
+    <button class="back-mini" onclick="goTitle()">← 戻る</button>
+  </div>
+
+  <!-- DREP POPUP -->
+  <div class="drep-popup" id="drepPopup">
+    <button class="pop-close" onclick="closePopup()">✕</button>
+    <div class="dp-pop-name" id="pp_name">—</div>
+    <div class="dp-pop-type" id="pp_type"></div>
+    <div class="dp-pop-stats">
+      <div class="dp-pop-stat"><div class="dp-pop-sl">投票力</div><div class="dp-pop-sv gold" id="pp_power">—</div></div>
+      <div class="dp-pop-stat"><div class="dp-pop-sl">投票率</div><div class="dp-pop-sv green" id="pp_vr">—</div></div>
+      <div class="dp-pop-stat"><div class="dp-pop-sl">委任者数</div><div class="dp-pop-sv blue" id="pp_del">—</div></div>
+      <div class="dp-pop-stat"><div class="dp-pop-sl">平均期間</div><div class="dp-pop-sv purple" id="pp_days">—</div></div>
+    </div>
+    <div class="whale-bar-wrap">
+      <div class="whale-bar-lbl">
+        <span>🐋 クジラ支配率</span>
+        <span id="pp_whale_pct" style="font-family:'Orbitron',monospace;font-size:9px;font-weight:700;color:#fb7185;">—</span>
+      </div>
+      <div class="whale-track"><div class="whale-fill" id="pp_whale_bar" style="width:0%"></div></div>
+    </div>
+    <div class="dp-pop-conc-warn" id="pp_concwarn" style="display:none"></div>
+    <div class="dp-pop-comment" id="pp_comment"></div>
+    <button class="dp-pop-sel-btn" onclick="selectFromPopup()">✨ この惑星に委任する</button>
+  </div>
+
+  <!-- VOTE EVENT PANEL -->
+  <div class="vote-panel" id="votePanel">
+    <div class="vp-title">🗳️ 投票イベント！</div>
+    <div class="vp-sub" id="vp_sub">DRepたちが予算の使い道を議決中...</div>
+    <div class="vp-proposal">
+      <div class="vp-pname" id="vp_pname">—</div>
+      <div class="vp-pdesc" id="vp_pdesc">—</div>
+      <div class="vp-pbudget" id="vp_budget">— ADA</div>
+    </div>
+    <div class="vote-bar"><div class="vote-yes" id="vp_yesbar" style="width:0%"></div></div>
+    <div class="vote-stats">
+      <span class="vote-yes-lbl">賛成: <span id="vp_yes">0</span>%</span>
+      <span class="vote-no-lbl">反対: <span id="vp_no">0</span>%</span>
+    </div>
+    <div class="vote-result" id="vp_result"></div>
+    <button class="vote-close" onclick="closeVote()">閉じる</button>
+  </div>
+
+  <!-- BOTTOM HUD -->
+  <div class="hud-bot">
+    <!-- Galaxy Rank -->
+    <div class="galaxy-panel">
+      <div class="gp-title">🌌 銀河ランキング</div>
+      <div id="galaxyRank"></div>
+    </div>
+    <!-- Delegate Panel -->
+    <div class="del-panel">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+        <div class="dp-title" style="margin-bottom:0">🪐 委任を管理</div>
+        <div style="display:flex;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:8px;overflow:hidden;flex-shrink:0;">
+          <button class="dp-mode-btn on" id="btn_add" onclick="setDpMode('add')">➕ 委任</button>
+          <button class="dp-mode-btn" id="btn_reduce" onclick="setDpMode('reduce')">➖ 減らす</button>
+        </div>
+      </div>
+      <div class="dp-sel-row">
+        <select class="dp-sel" id="dp_sel" onchange="dpSelChange()"></select>
+        <input class="dp-amt" id="dp_amt" type="number" placeholder="ADA">
+      </div>
+      <div id="dp_current_hint" style="font-size:8px;color:rgba(255,255,255,.35);font-family:Orbitron,monospace;margin:-4px 0 4px;display:none;">
+        委任中: <span id="dp_current_amt" style="color:#a78bfa;font-weight:700">0</span> ADA
+      </div>
+      <input type="range" class="dp-slider" id="dp_slider" min="0" max="50000" value="0" oninput="dpSliderChange()">
+      <div class="dp-pcts">
+        <div class="dp-pct" onclick="dpSetPct(25)">25%</div>
+        <div class="dp-pct" onclick="dpSetPct(50)">50%</div>
+        <div class="dp-pct" onclick="dpSetPct(75)">75%</div>
+        <div class="dp-pct" onclick="dpSetPct(100)">MAX</div>
+      </div>
+      <button class="dp-delegate-btn" id="dp_btn" onclick="dpExec()">🌟 委任して銀河を守る！</button>
+    </div>
+    <!-- Status Panel -->
+    <div class="status-panel">
+      <div class="sp-title">📡 委任ステータス</div>
+      <div id="statusList"></div>
+    </div>
+  </div>
+
+  <!-- XP LEVEL UP -->
+  <div class="lvl-up" id="lvlUp" onclick="closeLvlUp()">
+    <div class="lvl-box">
+      <div class="lvl-star" id="lvl_star">⭐</div>
+      <div class="lvl-title" id="lvl_title">LEVEL UP!</div>
+      <div class="lvl-name" id="lvl_name">BRONZE DELEGATOR</div>
+      <button class="lvl-cont">続ける →</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="gtoast" id="gtoast"></div>
+
+<script>
+// ══════════════════════════════════════════════════════════
+// BACKGROUND STARS
+// ══════════════════════════════════════════════════════════
+const bgC = document.getElementById('bg');
+const bgX = bgC.getContext('2d');
+let bgStars = [];
+function initBg() {
+  bgC.width = innerWidth; bgC.height = innerHeight;
+  bgStars = Array.from({length: 280}, () => ({
+    x: Math.random() * innerWidth, y: Math.random() * innerHeight,
+    r: Math.random() * 1.8 + .2, a: Math.random(),
+    s: Math.random() * .008 + .002, dx: (Math.random() - .5) * .08
+  }));
+}
+function drawBg() {
+  bgX.clearRect(0, 0, bgC.width, bgC.height);
+  bgStars.forEach(s => {
+    s.a += s.s; s.x += s.dx;
+    if (s.x < 0) s.x = bgC.width; if (s.x > bgC.width) s.x = 0;
+    const a = (Math.sin(s.a) + 1) / 2;
+    bgX.beginPath(); bgX.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+    bgX.fillStyle = `rgba(180,210,255,${a * .7})`; bgX.fill();
+  });
+  // Nebula
+  const nb = bgX.createRadialGradient(innerWidth * .3, innerHeight * .4, 0, innerWidth * .3, innerHeight * .4, innerWidth * .45);
+  nb.addColorStop(0, 'rgba(100,60,180,.06)'); nb.addColorStop(1, 'transparent');
+  bgX.fillStyle = nb; bgX.fillRect(0, 0, bgC.width, bgC.height);
+  const nb2 = bgX.createRadialGradient(innerWidth * .75, innerHeight * .6, 0, innerWidth * .75, innerHeight * .6, innerWidth * .35);
+  nb2.addColorStop(0, 'rgba(30,80,180,.05)'); nb2.addColorStop(1, 'transparent');
+  bgX.fillStyle = nb2; bgX.fillRect(0, 0, bgC.width, bgC.height);
+}
+initBg();
+function bgLoop() { drawBg(); requestAnimationFrame(bgLoop); }
+bgLoop();
+window.addEventListener('resize', initBg);
+
+// ══════════════════════════════════════════════════════════
+// DREP DATA
+// ══════════════════════════════════════════════════════════
+const DREPS = [
+  {n:'InactiveA',  p:2.8,  type:'individual', vr:8,  avgDays:41,  inactive:95, delegators:312,  whalePct:72, budget:0,
+   comment:'⚠️ 95日間投票なし。この惑星の太陽はほぼ機能停止。施設建設も停滞中。', emoji:'💀'},
+  {n:'InactiveB',  p:1.4,  type:'corp',        vr:12, avgDays:55,  inactive:82, delegators:198,  whalePct:85, budget:0,
+   comment:'⚠️ 82日間投票なし。クジラに支配されほぼ機能しない太陽系。', emoji:'☠️'},
+  {n:'Yoroi WALlet',p:11.98,type:'wallet',     vr:72, avgDays:312, inactive:0,  delegators:14820, whalePct:68, budget:2200,
+   comment:'最大勢力の太陽系。でもクジラ支配率68%。施設は育つが偏りがち。', emoji:'🔴'},
+  {n:'YUTA',       p:7.94, type:'individual',  vr:91, avgDays:295, inactive:0,  delegators:3240,  whalePct:28, budget:1800,
+   comment:'分散度が高くクジラが少ない優良な太陽系！91%の高い投票参加率で施設も多彩。', emoji:'🌟'},
+  {n:'EMURGO',     p:5.15, type:'corp',        vr:68, avgDays:278, inactive:0,  delegators:1850,  whalePct:55, budget:1200,
+   comment:'Cardano創業団体の太陽系。安定しているが企業クジラが存在。', emoji:'🏢'},
+  {n:'Blockdaemon',p:4.94, type:'corp',        vr:55, avgDays:301, inactive:0,  delegators:69,    whalePct:94, budget:800,
+   comment:'⚠️ 委任者69名だが3クジラが94%支配！民主的とは言えない危険な惑星。', emoji:'🐋'},
+  {n:'Eternl DRe', p:4.29, type:'wallet',      vr:70, avgDays:287, inactive:0,  delegators:6320,  whalePct:52, budget:1100,
+   comment:'ウォレット系大型太陽系。クジラ率52%でバランスはやや不安定。', emoji:'🔵'},
+  {n:'CryptoCrow', p:3.65, type:'individual',  vr:85, avgDays:265, inactive:0,  delegators:890,   whalePct:22, budget:950,
+   comment:'個人DRepで分散度が高い！クジラが少なく市民の声が届きやすい太陽系。', emoji:'🦅'},
+  {n:'Cardano F',  p:3.24, type:'foundation',  vr:78, avgDays:271, inactive:0,  delegators:2100,  whalePct:35, budget:1050,
+   comment:'Cardano財団の太陽系。中立的で施設のバランスが良い。', emoji:'🏛️'},
+  {n:'Sebastien',  p:3.23, type:'individual',  vr:88, avgDays:248, inactive:0,  delegators:720,   whalePct:18, budget:900,
+   comment:'クジラ率18%と非常に低い理想的な太陽系！技術系施設に強い。', emoji:'⭐'},
+  {n:'SIPO',       p:2.01, type:'individual',  vr:94, avgDays:234, inactive:0,  delegators:450,   whalePct:12, budget:720,
+   comment:'投票参加率94%・クジラ率12%！銀河で最も民主的な太陽系のひとつ。', emoji:'💎'},
+  {n:'Everstake',  p:1.99, type:'corp',        vr:61, avgDays:290, inactive:0,  delegators:5899,  whalePct:48, budget:680,
+   comment:'大手ステーキング企業の太陽系。委任者数は多いが参加率61%はやや低め。', emoji:'🏗️'},
+  {n:'JAZZ',       p:1.79, type:'individual',  vr:82, avgDays:221, inactive:0,  delegators:330,   whalePct:20, budget:620,
+   comment:'コミュニティ重視の太陽系。クジラが少なく多様な施設が生まれやすい。', emoji:'🎵'},
+  {n:'BTBF_XS',   p:1.72, type:'spo',         vr:79, avgDays:258, inactive:0,  delegators:280,   whalePct:25, budget:580,
+   comment:'SPO出身。技術系施設に強い太陽系。クジラ少なめで安定。', emoji:'⚙️'},
+  {n:'SIPO 2',     p:1.53, type:'individual',  vr:88, avgDays:198, inactive:0,  delegators:210,   whalePct:15, budget:540,
+   comment:'小規模だが質の高い太陽系。分散化への貢献度が高い！', emoji:'✨'},
+  {n:'NomosD',     p:0.88, type:'individual',  vr:81, avgDays:165, inactive:0,  delegators:145,   whalePct:10, budget:380,
+   comment:'小さいけど最も分散した太陽系のひとつ！クジラ率10%で完全に市民主権。', emoji:'🌱'},
+  {n:'Dave',       p:0.74, type:'individual',  vr:85, avgDays:133, inactive:0,  delegators:98,    whalePct:8,  budget:320,
+   comment:'超小規模でもクジラ率8%！ここへの委任は銀河の多様性に大貢献。', emoji:'🌟'},
+  {n:'AichiT',     p:0.48, type:'individual',  vr:80, avgDays:102, inactive:0,  delegators:72,    whalePct:14, budget:260,
+   comment:'日本系個人DRep。小さな太陽系だが活発で施設も着実に育っている。', emoji:'🗾'},
+];
+
+// Other L1 galaxies competing
+const OTHER_L1 = [
+  {name:'Ethereum', ico:'⬡', score: 9200, color:'#6366f1', growth: 1.4, tvl:58000, dapps:4200},
+  {name:'Solana',   ico:'◎', score: 8100, color:'#a855f7', growth: 2.1, tvl:12000, dapps:980},
+  {name:'Cardano',  ico:'∞', score: 4000, color:'#60a5fa', growth: 0,   tvl:890,   dapps:185, isMe: true},
+  {name:'Avalanche',ico:'△', score: 3200, color:'#f43f5e', growth: 1.0, tvl:3100,  dapps:620},
+  {name:'Polkadot', ico:'⬡', score: 2800, color:'#e879f9', growth: 0.7, tvl:1800,  dapps:340},
+  {name:'BNB',      ico:'◈', score: 6800, color:'#eab308', growth: 1.2, tvl:8200,  dapps:1400},
+];
+
+// Proposals / facilities to vote on
+const PROPOSALS = [
+  {name:'DeFi プロトコル建設', desc:'高度な分散金融施設。利用者増加→施設収益UP', budget:'₳ 2,000,000', xpBonus:30, scoreBonus:50},
+  {name:'NFT マーケット整備', desc:'クリエイター向け施設。新ユーザー呼び込み効果大', budget:'₳ 800,000',  xpBonus:20, scoreBonus:35},
+  {name:'ゲームハブ開発',     desc:'エンタメ施設。若いユーザーを銀河に引き込む！', budget:'₳ 1,200,000', xpBonus:25, scoreBonus:42},
+  {name:'教育センター設立',   desc:'ガバナンス学習施設。委任参加率UP効果あり',   budget:'₳ 500,000',  xpBonus:15, scoreBonus:28},
+  {name:'インフラ基盤強化',   desc:'太陽系の基礎インフラ。全施設の品質が上がる', budget:'₳ 3,000,000', xpBonus:40, scoreBonus:65},
+  {name:'グローバルハブ誘致', desc:'他銀河からのユーザー獲得施設！',             budget:'₳ 1,800,000', xpBonus:35, scoreBonus:58},
+];
+
+// XP Levels
+const LEVELS = [
+  {min:0,   name:'Newcomer',          tier:'— None',   ico:'🌑', stars:'⭐'},
+  {min:100, name:'Bronze Delegator',  tier:'🥉 Bronze', ico:'🌒', stars:'⭐⭐'},
+  {min:300, name:'Silver Steward',    tier:'🥈 Silver', ico:'🌓', stars:'⭐⭐⭐'},
+  {min:600, name:'Platinum Guardian', tier:'🏅 Platinum',ico:'🌔',stars:'💫💫💫'},
+  {min:1000,name:'Diamond Architect', tier:'💎 Diamond', ico:'🌕', stars:'✨✨✨✨'},
+  {min:2000,name:'Galaxy Hero',       tier:'🌟 GALAXY',  ico:'🌟', stars:'🌟🌟🌟🌟🌟'},
+];
+
+// ══════════════════════════════════════════════════════════
+// GAME STATE
+// ══════════════════════════════════════════════════════════
+let charType = 'dolphin';
+let totalADA = 50000;
+let delegations = [];  // {drepIdx, ada}
+let xp = 0, level = 0;
+let decScore = 0;
+let l1Scores = OTHER_L1.map(x => ({...x}));
+let selectedDrepInPopup = -1;
+let bubbles = [];
+let particles = [];
+let facilities = {}; // drepIdx -> [{type, x, y, built, anim}]
+let voteActive = false;
+let af = 0;
+let baseStarfield = [];
+let cW = 0, cH = 0;
+
+const CHAR_ADA = {shrimp: 5000, dolphin: 50000, whale: 500000};
+const CHAR_EMO = {shrimp: '🦐', dolphin: '🐬', whale: '🐳'};
+
+// ══════════════════════════════════════════════════════════
+// TITLE
+// ══════════════════════════════════════════════════════════
+function selChar(type, el) {
+  charType = type;
+  document.querySelectorAll('.char-card').forEach(c => c.classList.remove('sel'));
+  el.classList.add('sel');
+  document.getElementById('startBtn').disabled = false;
+}
+function startGame() {
+  totalADA = CHAR_ADA[charType];
+  delegations = [];
+  xp = 0; level = 0; decScore = 0;
+  l1Scores = OTHER_L1.map(x => ({...x}));
+  particles = [];
+  facilities = {};
+  document.getElementById('titleScr').classList.remove('on');
+  document.getElementById('gameScr').classList.add('on');
+  initGame();
+}
+function goTitle() {
+  document.getElementById('gameScr').classList.remove('on');
+  document.getElementById('titleScr').classList.add('on');
+}
+
+// ══════════════════════════════════════════════════════════
+// GAME CANVAS INIT
+// ══════════════════════════════════════════════════════════
+const gc = document.getElementById('gc');
+const gx = gc.getContext('2d');
+function initGame() {
+  resizeGame();
+  buildBubbles();
+  buildSelect();
+  updateHUD();
+  updateStatus();
+  updateGalaxyRank();
+  requestAnimationFrame(gameLoop);
+  // Start periodic vote events
+  setTimeout(triggerVoteEvent, 18000);
+  // L1 competition grows
+  setInterval(growL1, 6000);
+}
+function resizeGame() {
+  const wrap = document.getElementById('cview') || document.getElementById('gameScr');
+  cW = gc.parentElement.clientWidth || innerWidth;
+  cH = gc.parentElement.clientHeight || innerHeight;
+  gc.width = cW * devicePixelRatio; gc.height = cH * devicePixelRatio;
+  gc.style.width = cW + 'px'; gc.style.height = cH + 'px';
+  gx.scale(devicePixelRatio, devicePixelRatio);
+  buildBubbles();
+}
+window.addEventListener('resize', resizeGame);
+
+// ══════════════════════════════════════════════════════════
+// BUBBLES / PLANETS
+// ══════════════════════════════════════════════════════════
+function buildBubbles() {
+  const cx = cW / 2, cy = cH * .42, baseR = Math.min(cW, cH) * .36;
+  bubbles = DREPS.map((d, i) => {
+    const r = Math.max(Math.sqrt(d.p / 12) * Math.min(cW, cH) * .11 + 14, 14);
+    const angle = (i / DREPS.length) * Math.PI * 2 - Math.PI / 2;
+    const frac = .2 + .72 * (1 - Math.min(d.p / 12, 1));
+    const base = getBubbleColor(d);
+    return {
+      d, i, r, extraR: 0, wobble: Math.random() * Math.PI * 2,
+      x: cx + Math.cos(angle) * baseR * frac,
+      y: cy + Math.sin(angle) * baseR * frac,
+      col: base, glowIntensity: 0, pulseOffset: Math.random() * Math.PI * 2
+    };
+  });
+  // Prevent overlaps
+  for (let iter = 0; iter < 200; iter++) {
+    for (let a = 0; a < bubbles.length; a++) {
+      for (let b = a + 1; b < bubbles.length; b++) {
+        const ba = bubbles[a], bb = bubbles[b];
+        const ra = ba.r + (ba.extraR || 0), rb = bb.r + (bb.extraR || 0);
+        const dx = bb.x - ba.x, dy = bb.y - ba.y;
+        const dist = Math.sqrt(dx * dx + dy * dy) || .01;
+        const minD = ra + rb + 8;
+        if (dist < minD) {
+          const push = (minD - dist) / 2, nx = dx / dist, ny = dy / dist;
+          ba.x -= nx * push * .5; ba.y -= ny * push * .5;
+          bb.x += nx * push * .5; bb.y += ny * push * .5;
+        }
+      }
+    }
+  }
+  // Init facilities
+  DREPS.forEach((d, i) => { if (!facilities[i]) facilities[i] = []; });
+}
+function getBubbleColor(d) {
+  if (d.inactive > 60) return [100, 100, 120];
+  if (d.whalePct > 80) return [220, 80, 80];
+  if (d.whalePct > 50) return [220, 140, 60];
+  if (d.p > 8) return [200, 100, 80];
+  if (d.whalePct < 20) return [60, 200, 140];
+  if (d.whalePct < 35) return [80, 160, 220];
+  return [140, 100, 220];
+}
+function rgba(c, a) { return `rgba(${c[0]},${c[1]},${c[2]},${a})`; }
+
+// ══════════════════════════════════════════════════════════
+// DRAW
+// ══════════════════════════════════════════════════════════
+function drawPlanet(b, isHovered) {
+  const { x, y, d, col, pulseOffset } = b;
+  const r = b.r + (b.extraR || 0);
+  const pulse = Math.sin(af * .04 + pulseOffset) * .5 + .5;
+  gx.save();
+
+  // Inactive warning glow
+  if (d.inactive > 60) {
+    const g = gx.createRadialGradient(x, y, r * .5, x, y, r * 2.8);
+    g.addColorStop(0, `rgba(200,50,50,${.2 + pulse * .1})`);
+    g.addColorStop(1, 'rgba(200,50,50,0)');
+    gx.beginPath(); gx.arc(x, y, r * 2.8, 0, Math.PI * 2);
+    gx.fillStyle = g; gx.fill();
+  }
+  // Whale warning glow
+  else if (d.whalePct > 70) {
+    const g = gx.createRadialGradient(x, y, r, x, y, r * 2.2);
+    g.addColorStop(0, `rgba(220,80,80,${.12 + pulse * .06})`);
+    g.addColorStop(1, 'rgba(220,80,80,0)');
+    gx.beginPath(); gx.arc(x, y, r * 2.2, 0, Math.PI * 2);
+    gx.fillStyle = g; gx.fill();
+  }
+
+  // Hover glow
+  if (isHovered) {
+    const g = gx.createRadialGradient(x, y, r * .5, x, y, r * 2.4);
+    g.addColorStop(0, rgba(col, .25)); g.addColorStop(1, rgba(col, 0));
+    gx.beginPath(); gx.arc(x, y, r * 2.4, 0, Math.PI * 2);
+    gx.fillStyle = g; gx.fill();
+  }
+
+  // Planet body gradient
+  const g2 = gx.createRadialGradient(x - r * .28, y - r * .3, 0, x, y, r);
+  g2.addColorStop(0, rgba(col, isHovered ? .9 : .65));
+  g2.addColorStop(.6, rgba(col, isHovered ? .45 : .28));
+  g2.addColorStop(1, rgba(col, .06));
+  gx.beginPath(); gx.arc(x, y, r, 0, Math.PI * 2);
+  gx.fillStyle = g2; gx.fill();
+
+  // Ring (for whales)
+  if (d.whalePct > 50) {
+    gx.beginPath();
+    gx.ellipse(x, y, r * 1.55, r * .35, Math.PI / 10, 0, Math.PI * 2);
+    gx.strokeStyle = rgba(col, .25); gx.lineWidth = 2; gx.stroke();
+  }
+
+  // Vote rate arc
+  if (r > 18) {
+    gx.beginPath();
+    gx.arc(x, y, r - 2, -Math.PI / 2, -Math.PI / 2 + (d.vr / 100) * Math.PI * 2);
+    const arcColor = d.inactive > 60 ? 'rgba(200,60,60,.7)' : d.whalePct > 70 ? 'rgba(255,140,50,.7)' : 'rgba(100,220,160,.7)';
+    gx.strokeStyle = arcColor; gx.lineWidth = 2.2; gx.stroke();
+  }
+
+  // Delegation indicator (YOUR stake)
+  const myDel = delegations.find(x => x.drepIdx === b.i);
+  if (myDel) {
+    gx.beginPath(); gx.arc(x, y, r + 5 + pulse * 3, 0, Math.PI * 2);
+    gx.strokeStyle = `rgba(167,139,250,${.5 + pulse * .3})`; gx.lineWidth = 2; gx.setLineDash([4, 6]); gx.stroke(); gx.setLineDash([]);
+    // Mini orbit dots
+    for (let o = 0; o < 3; o++) {
+      const oa = af * .04 + (o / 3) * Math.PI * 2;
+      const ox2 = x + Math.cos(oa) * (r + 12), oy2 = y + Math.sin(oa) * (r + 12);
+      gx.beginPath(); gx.arc(ox2, oy2, 2, 0, Math.PI * 2);
+      gx.fillStyle = 'rgba(167,139,250,.8)'; gx.fill();
+    }
+  }
+
+  // Specular highlight
+  const sh = gx.createRadialGradient(x - r * .3, y - r * .32, 0, x - r * .3, y - r * .32, r * .5);
+  sh.addColorStop(0, 'rgba(255,255,255,.18)'); sh.addColorStop(1, 'transparent');
+  gx.beginPath(); gx.arc(x, y, r, 0, Math.PI * 2);
+  gx.fillStyle = sh; gx.fill();
+
+  // Text
+  const fS = Math.min(r * .28, 11);
+  if (r > 24) {
+    gx.fillStyle = 'rgba(255,255,255,.92)';
+    gx.font = `700 ${fS}px Nunito`; gx.textAlign = 'center'; gx.textBaseline = 'middle';
+    const nm = d.n.length > 9 ? d.n.slice(0, 8) + '…' : d.n;
+    gx.fillText(nm, x, y - 4);
+    gx.fillStyle = rgba(col, .95);
+    gx.font = `700 ${Math.min(r * .22, 9)}px Orbitron`;
+    gx.fillText(d.p.toFixed(1) + '%', x, y + 6);
+    // Whale indicator
+    if (d.whalePct > 60) {
+      gx.font = `${Math.min(r * .22, 9)}px sans-serif`;
+      gx.fillText('🐋', x, y + 15);
+    }
+  } else if (r > 15) {
+    gx.fillStyle = 'rgba(255,255,255,.8)'; gx.font = `700 ${fS}px Nunito`;
+    gx.textAlign = 'center'; gx.textBaseline = 'middle';
+    gx.fillText(d.n.slice(0, 5), x, y - 2);
+    gx.fillStyle = rgba(col, .9); gx.font = `700 ${Math.min(r * .2, 8)}px Orbitron`;
+    gx.fillText(d.p.toFixed(1) + '%', x, y + 7);
+  } else if (r > 9) {
+    gx.fillStyle = 'rgba(255,255,255,.7)'; gx.font = `600 ${Math.min(r * .28, 8)}px Nunito`;
+    gx.textAlign = 'center'; gx.textBaseline = 'middle';
+    gx.fillText(d.n.slice(0, 4), x, y);
+  }
+
+  // Emoji badge
+  gx.font = `${Math.min(r * .3, 11)}px sans-serif`;
+  gx.fillText(d.emoji || '', x + r * .55, y - r * .55);
+  gx.restore();
+}
+
+function drawFacilities(b) {
+  const facs = facilities[b.i] || [];
+  facs.forEach((f, fi) => {
+    const angle = (fi / Math.max(facs.length, 1)) * Math.PI * 2 - Math.PI / 2;
+    const r = b.r + (b.extraR || 0);
+    const fx = b.x + Math.cos(angle) * (r + 22), fy = b.y + Math.sin(angle) * (r + 22);
+    f.anim = (f.anim || 0) + .03;
+    const scale = f.built ? 1 : Math.min(f.anim, 1);
+    gx.save(); gx.translate(fx, fy); gx.scale(scale, scale);
+    gx.font = '12px sans-serif'; gx.textAlign = 'center'; gx.textBaseline = 'middle';
+    gx.fillText(f.ico, 0, 0);
+    gx.restore();
+  });
+}
+
+function drawDelegationLines() {
+  delegations.forEach(del => {
+    const b = bubbles[del.drepIdx]; if (!b) return;
+    const cx = cW / 2, cy = cH * .42;
+    const pulse = (Math.sin(af * .06) + 1) / 2;
+    gx.save();
+    gx.beginPath(); gx.moveTo(cx, cy); gx.lineTo(b.x, b.y);
+    gx.strokeStyle = `rgba(167,139,250,${.08 + pulse * .06})`; gx.lineWidth = .8;
+    gx.setLineDash([4, 10]); gx.stroke(); gx.setLineDash([]);
+    gx.restore();
+  });
+}
+
+function drawParticles() {
+  particles = particles.filter(p => p.life > 0);
+  particles.forEach(p => {
+    p.x += p.vx; p.y += p.vy; p.vy += .04; p.life -= 2; p.r *= .97;
+    const a = p.life / 100;
+    gx.beginPath(); gx.arc(p.x, p.y, Math.max(p.r, .5), 0, Math.PI * 2);
+    gx.fillStyle = `${p.color.slice(0,-1)},${a})`; gx.fill();
+  });
+}
+
+
+
+// Galaxy economy state — drives the center display
+let galaxyEconomy = {
+  chainRevenue: 12400,    // simulated ADA revenue per epoch
+  treasury: 1_240_000_000, // current treasury balance
+  tvl: 890_000_000,       // total value locked
+  txCount: 4820,          // transactions per day (thousands)
+  facilityCount: 0,       // built facilities
+  userCount: 680_000,     // ecosystem users
+};
+function tickGalaxyEconomy() {
+  const del = delegations.length;
+  const decBonus = 1 + Math.min(decScore / 500, 1.2);
+  // Revenue ticks up with decentralization and facilities
+  galaxyEconomy.chainRevenue += Math.floor((del * 120 + galaxyEconomy.facilityCount * 80) * decBonus * (Math.random() * .4 + .8));
+  galaxyEconomy.tvl += Math.floor(galaxyEconomy.facilityCount * 4_500_000 * (Math.random() * .3 + .85));
+  galaxyEconomy.txCount += Math.floor(del * 18 + galaxyEconomy.facilityCount * 12);
+  galaxyEconomy.userCount += Math.floor(del * 40 + galaxyEconomy.facilityCount * 180);
+  // Treasury grows from chain revenue
+  galaxyEconomy.treasury += Math.floor(galaxyEconomy.chainRevenue * 0.2);
+  // Count facilities
+  galaxyEconomy.facilityCount = Object.values(facilities).reduce((s, f) => s + f.length, 0);
+}
+setInterval(tickGalaxyEconomy, 3000);
+
+function drawGalaxyEconomy() {
+  const cx = cW / 2, cy = cH * .42;
+  const health = Math.min(decScore / 300, 1);
+  const pulse = Math.sin(af * .03) * .5 + .5;
+  const pulse2 = Math.sin(af * .05 + 1) * .5 + .5;
+  gx.save();
+
+  // Outer boundary ring
+  gx.beginPath(); gx.arc(cx, cy, Math.min(cW, cH) * .36, 0, Math.PI * 2);
+  gx.strokeStyle = `rgba(167,139,250,${.07 + pulse * .03})`; gx.lineWidth = 1; gx.stroke();
+
+  // Nebula glow — color shifts with health
+  const r1 = 80 + health * 60;
+  const g = gx.createRadialGradient(cx, cy, 0, cx, cy, r1);
+  if (health > .6) {
+    g.addColorStop(0, `rgba(52,211,153,${.10 + health * .08 + pulse * .02})`);
+    g.addColorStop(.5, `rgba(96,165,250,${.05 + health * .04})`);
+  } else if (health > .3) {
+    g.addColorStop(0, `rgba(251,191,36,${.10 + pulse * .03})`);
+    g.addColorStop(.5, `rgba(167,139,250,${.04})`);
+  } else {
+    g.addColorStop(0, `rgba(167,139,250,${.08 + pulse * .02})`);
+    g.addColorStop(.5, `rgba(96,165,250,${.03})`);
+  }
+  g.addColorStop(1, 'transparent');
+  gx.beginPath(); gx.arc(cx, cy, r1, 0, Math.PI * 2);
+  gx.fillStyle = g; gx.fill();
+
+  // Rotating economy rings
+  for (let ring = 0; ring < 3; ring++) {
+    const rr = 32 + ring * 18;
+    const speed = (.008 + ring * .003) * (ring % 2 ? 1 : -1);
+    const startA = af * speed;
+    gx.beginPath();
+    gx.arc(cx, cy, rr, startA, startA + Math.PI * (1.2 - ring * .15));
+    gx.strokeStyle = `rgba(${ring===0?'251,191,36':ring===1?'52,211,153':'167,139,250'},${.18 + pulse * .06})`;
+    gx.lineWidth = 1.5; gx.stroke();
+  }
+
+  // Center icon — pulsing galaxy symbol
+  const iconSize = 20 + pulse2 * 4;
+  gx.font = `${iconSize}px sans-serif`;
+  gx.textAlign = 'center'; gx.textBaseline = 'middle';
+  gx.globalAlpha = .75 + pulse2 * .2;
+  gx.fillText('🌌', cx, cy - 2);
+  gx.globalAlpha = 1;
+
+  // Economy stats floating around center
+  const stats = [
+    { label: 'Chain 売上', value: '₳' + (galaxyEconomy.chainRevenue / 1000).toFixed(1) + 'K', color: 'rgba(251,191,36,.9)',  angle: -Math.PI/2 },
+    { label: 'Treasury',   value: '₳' + (galaxyEconomy.treasury / 1_000_000_000).toFixed(2) + 'B', color: 'rgba(52,211,153,.9)',  angle: Math.PI/6 },
+    { label: 'TVL',        value: '$' + (galaxyEconomy.tvl / 1_000_000).toFixed(0) + 'M', color: 'rgba(167,139,250,.9)', angle: Math.PI*5/6 },
+    { label: 'TX/day',     value: (galaxyEconomy.txCount / 1000).toFixed(0) + 'K',          color: 'rgba(96,165,250,.9)',  angle: Math.PI/2 },
+    { label: '施設数',     value: galaxyEconomy.facilityCount + '棟',                        color: 'rgba(249,115,22,.9)',  angle: -Math.PI*5/6 },
+    { label: 'ユーザー',   value: (galaxyEconomy.userCount / 1000).toFixed(0) + 'K',         color: 'rgba(244,63,94,.85)', angle: -Math.PI/6 },
+  ];
+  const statR = 110;
+  stats.forEach(st => {
+    const sx = cx + Math.cos(st.angle) * statR;
+    const sy = cy + Math.sin(st.angle) * statR;
+    // Small glow
+    const sg = gx.createRadialGradient(sx, sy, 0, sx, sy, 22);
+    sg.addColorStop(0, st.color.replace('.9)', '.12)').replace('.85)', '.12)'));
+    sg.addColorStop(1, 'transparent');
+    gx.beginPath(); gx.arc(sx, sy, 22, 0, Math.PI * 2);
+    gx.fillStyle = sg; gx.fill();
+    // Label
+    gx.fillStyle = 'rgba(255,255,255,.38)';
+    gx.font = '7px Orbitron'; gx.textAlign = 'center'; gx.textBaseline = 'middle';
+    gx.fillText(st.label, sx, sy - 7);
+    // Value
+    gx.fillStyle = st.color;
+    gx.font = 'bold 9px Orbitron'; gx.textAlign = 'center'; gx.textBaseline = 'middle';
+    gx.fillText(st.value, sx, sy + 4);
+    // Connector line to center
+    gx.beginPath(); gx.moveTo(cx, cy); gx.lineTo(sx, sy);
+    gx.strokeStyle = st.color.replace('.9)', '.08)').replace('.85)', '.08)');
+    gx.lineWidth = .5; gx.stroke();
+  });
+
+  // Player character — small, orbiting
+  const playerAngle = af * .012;
+  const px2 = cx + Math.cos(playerAngle) * 26;
+  const py2 = cy + Math.sin(playerAngle) * 26;
+  gx.font = '14px sans-serif'; gx.textAlign = 'center'; gx.textBaseline = 'middle';
+  gx.fillText(CHAR_EMO[charType] || '🐬', px2, py2);
+
+  gx.restore();
+}
+
+// Hover tracking
+let hov = -1;
+gc.addEventListener('mousemove', e => {
+  const rect = gc.getBoundingClientRect();
+  const mx = e.clientX - rect.left, my = e.clientY - rect.top;
+  let found = -1;
+  for (let i = 0; i < bubbles.length; i++) {
+    const b = bubbles[i], r = b.r + (b.extraR || 0);
+    if (Math.hypot(mx - b.x, my - b.y) < r + 8) { found = i; break; }
+  }
+  hov = found;
+  gc.style.cursor = found >= 0 ? 'pointer' : 'default';
+});
+gc.addEventListener('click', e => {
+  const rect = gc.getBoundingClientRect();
+  const mx = e.clientX - rect.left, my = e.clientY - rect.top;
+  for (let i = 0; i < bubbles.length; i++) {
+    const b = bubbles[i], r = b.r + (b.extraR || 0);
+    if (Math.hypot(mx - b.x, my - b.y) < r + 8) { showPopup(i, e.clientX, e.clientY); return; }
+  }
+  closePopup();
+});
+gc.addEventListener('mouseleave', () => { hov = -1; gc.style.cursor = 'default'; });
+
+// ══════════════════════════════════════════════════════════
+// GAME LOOP
+// ══════════════════════════════════════════════════════════
+function gameLoop() {
+  gx.clearRect(0, 0, cW, cH);
+  drawGalaxyEconomy();
+  drawDelegationLines();
+  bubbles.forEach((b, i) => {
+    b.wobble += .018;
+    b.x += Math.sin(b.wobble + b.pulseOffset) * .15;
+    b.y += Math.cos(b.wobble * .7 + b.pulseOffset) * .12;
+    drawFacilities(b);
+    drawPlanet(b, hov === i);
+  });
+  drawParticles();
+  af++;
+  requestAnimationFrame(gameLoop);
+}
+
+// ══════════════════════════════════════════════════════════
+// POPUP
+// ══════════════════════════════════════════════════════════
+function showPopup(idx, cx, cy) {
+  selectedDrepInPopup = idx;
+  const d = DREPS[idx];
+  const popup = document.getElementById('drepPopup');
+  document.getElementById('pp_name').textContent = d.emoji + ' ' + d.n;
+  const typeLabel = {wallet:'ウォレット系',corp:'企業系',foundation:'財団',individual:'個人DRep',spo:'SPO系'};
+  document.getElementById('pp_type').textContent = typeLabel[d.type] || d.type;
+  document.getElementById('pp_type').style.color = d.inactive>60?'#fb7185':d.whalePct>70?'#fb923c':'#a78bfa';
+  document.getElementById('pp_power').textContent = d.p.toFixed(2) + '%';
+  document.getElementById('pp_vr').textContent = d.vr + '%';
+  document.getElementById('pp_del').textContent = d.delegators.toLocaleString() + '人';
+  document.getElementById('pp_days').textContent = d.avgDays + '日';
+  // Whale bar
+  const wPct = d.whalePct;
+  document.getElementById('pp_whale_pct').textContent = wPct + '%';
+  const wBar = document.getElementById('pp_whale_bar');
+  wBar.style.width = wPct + '%';
+  wBar.style.background = wPct > 70 ? 'linear-gradient(90deg,#fb7185,#f43f5e)' : wPct > 40 ? 'linear-gradient(90deg,#fb923c,#fbbf24)' : 'linear-gradient(90deg,#34d399,#60a5fa)';
+  // Conc warning
+  const cw = document.getElementById('pp_concwarn');
+  if (d.whalePct > 70 || d.p > 5) {
+    cw.style.display = 'block';
+    cw.textContent = d.whalePct > 70 ? `🐋 クジラが${wPct}%を支配！この惑星は少数の意思で動きます` : `⚠️ 大規模DRep (${d.p.toFixed(1)}%)。委任すると分散化に逆行します`;
+  } else { cw.style.display = 'none'; }
+  document.getElementById('pp_comment').textContent = d.comment;
+  // Position popup
+  const pw = 260, ph = 340;
+  let px = Math.min(cx + 16, innerWidth - pw - 10);
+  let py = Math.min(cy - 80, innerHeight - ph - 10);
+  if (py < 60) py = 60;
+  popup.style.left = px + 'px'; popup.style.top = py + 'px';
+  popup.classList.add('show');
+  // Preselect in dropdown
+  document.getElementById('dp_sel').value = idx;
+  dpSelChange();
+}
+function closePopup() {
+  document.getElementById('drepPopup').classList.remove('show');
+  selectedDrepInPopup = -1;
+}
+function selectFromPopup() {
+  if (selectedDrepInPopup < 0) return;
+  document.getElementById('dp_sel').value = selectedDrepInPopup;
+  dpSelChange();
+  closePopup();
+  document.getElementById('dp_amt').focus();
+}
+
+// ══════════════════════════════════════════════════════════
+// DELEGATE CONTROLS
+// ══════════════════════════════════════════════════════════
+let dpMode = 'add'; // 'add' | 'reduce'
+
+function setDpMode(mode) {
+  dpMode = mode;
+  document.getElementById('btn_add').classList.toggle('on', mode === 'add');
+  document.getElementById('btn_reduce').classList.toggle('on', mode === 'reduce');
+  dpSelChange();
+  const btn = document.getElementById('dp_btn');
+  if (mode === 'add') {
+    btn.textContent = '🌟 委任して銀河を守る！';
+    btn.style.background = 'linear-gradient(135deg,#a78bfa,#60a5fa)';
+  } else {
+    btn.textContent = '↩️ 委任を減らす';
+    btn.style.background = 'linear-gradient(135deg,#f43f5e,#fb923c)';
+  }
+}
+
+function buildSelect() {
+  const sel = document.getElementById('dp_sel'); sel.innerHTML = '';
+  DREPS.forEach((d, i) => {
+    const o = document.createElement('option'); o.value = i;
+    const warn = d.inactive > 60 ? '💀' : d.whalePct > 70 ? '🐋' : d.whalePct < 25 ? '✨' : '';
+    o.textContent = warn + ' ' + d.n + ' (' + d.p.toFixed(1) + '%)';
+    sel.appendChild(o);
+  });
+}
+function getRemaining() {
+  return Math.max(0, totalADA - delegations.reduce((s, d) => s + d.ada, 0));
+}
+function dpSelChange() {
+  const idx = parseInt(document.getElementById('dp_sel').value);
+  const existing = delegations.find(x => x.drepIdx === idx);
+  const hint = document.getElementById('dp_current_hint');
+  const hintAmt = document.getElementById('dp_current_amt');
+  if (dpMode === 'reduce' && existing) {
+    document.getElementById('dp_slider').max = existing.ada;
+    hint.style.display = 'block';
+    hintAmt.textContent = existing.ada.toLocaleString();
+  } else if (dpMode === 'reduce') {
+    document.getElementById('dp_slider').max = 0;
+    hint.style.display = 'none';
+  } else {
+    const rem = getRemaining();
+    document.getElementById('dp_slider').max = rem;
+    hint.style.display = 'none';
+  }
+  document.getElementById('dp_slider').value = 0;
+  document.getElementById('dp_amt').value = '';
+  document.getElementById('dp_btn').disabled = false;
+}
+function dpSliderChange() {
+  const v = parseInt(document.getElementById('dp_slider').value) || 0;
+  document.getElementById('dp_amt').value = v;
+}
+function dpSetPct(pct) {
+  const idx = parseInt(document.getElementById('dp_sel').value);
+  const existing = delegations.find(x => x.drepIdx === idx);
+  let base;
+  if (dpMode === 'reduce' && existing) {
+    base = existing.ada;
+  } else {
+    base = getRemaining();
+  }
+  const v = Math.round(base * pct / 100 / 100) * 100 || Math.round(base * pct / 100);
+  document.getElementById('dp_amt').value = v;
+  document.getElementById('dp_slider').value = v;
+}
+
+function dpExec() {
+  if (dpMode === 'add') doDelegate();
+  else doWithdraw();
+}
+
+function doWithdraw() {
+  const idx = parseInt(document.getElementById('dp_sel').value);
+  const amt = parseInt(document.getElementById('dp_amt').value) || 0;
+  const existing = delegations.find(x => x.drepIdx === idx);
+  if (!existing) { showToast('このDRepへの委任はありません', 'warn'); return; }
+  if (amt <= 0) { showToast('引き出す量を入力してください', 'warn'); return; }
+  if (amt > existing.ada) { showToast(`委任量 ${existing.ada.toLocaleString()} ADA を超えています`, 'warn'); return; }
+  const d = DREPS[idx];
+  // Reduce delegation
+  existing.ada -= amt;
+  if (existing.ada <= 0) delegations.splice(delegations.indexOf(existing), 1);
+  // Shrink bubble
+  const b = bubbles[idx];
+  if (b) b.extraR = Math.max(0, (b.extraR || 0) - Math.sqrt(amt / Math.max(totalADA, 1)) * 30);
+  // Particles (orange — warning color for reducing)
+  spawnParticles(b ? b.x : cW/2, b ? b.y : cH/2, 'reduce');
+  // Small XP for active management
+  addXP(Math.floor(amt / 5000) + 2);
+  // Score adjustment
+  const scoreDelta = d.whalePct > 70 ? Math.floor(amt / 800) : -Math.floor(amt / 1200);
+  decScore = Math.max(0, decScore + scoreDelta);
+  // L1 small hit
+  const cardano = l1Scores.find(x => x.isMe);
+  if (cardano) cardano.score = Math.max(0, cardano.score - Math.floor(amt / 200));
+  updateHUD(); updateStatus(); updateGalaxyRank();
+  document.getElementById('dp_amt').value = '';
+  document.getElementById('dp_slider').value = 0;
+  dpSelChange();
+  const msg = d.whalePct > 70
+    ? `✅ ${d.n} からの引き出し完了！分散化スコアが改善しました`
+    : `↩️ ${d.n} から ${amt.toLocaleString()} ADA を引き出しました`;
+  showToast(msg, d.whalePct > 70 ? 'ok' : 'gold');
+}
+function doDelegate() {
+  const idx = parseInt(document.getElementById('dp_sel').value);
+  const amt = parseInt(document.getElementById('dp_amt').value) || 0;
+  if (amt <= 0) { showToast('委任量を入力してください', 'warn'); return; }
+  const rem = getRemaining();
+  if (amt > rem) { showToast('残高が不足しています', 'warn'); return; }
+  const d = DREPS[idx];
+  const ex = delegations.findIndex(x => x.drepIdx === idx);
+  if (ex >= 0) { delegations[ex].ada += amt; } else { delegations.push({drepIdx: idx, ada: amt}); }
+  // Grow bubble
+  const b = bubbles[idx];
+  if (b) b.extraR = (b.extraR || 0) + Math.sqrt(amt / Math.max(totalADA, 1)) * 30;
+  // Particles
+  spawnParticles(b.x, b.y, d.whalePct > 70 ? 'warn' : 'ok');
+  // XP calculation
+  let xpGain = Math.floor(amt / 1000) * 2;
+  if (d.whalePct < 20) xpGain = Math.floor(xpGain * 2.5);
+  else if (d.whalePct < 40) xpGain = Math.floor(xpGain * 1.8);
+  else if (d.whalePct > 70) xpGain = Math.floor(xpGain * 0.4);
+  if (delegations.length >= 3) xpGain = Math.floor(xpGain * 1.3);
+  if (charType === 'shrimp') xpGain = Math.floor(xpGain * 1.2);
+  addXP(xpGain);
+  // Score
+  let scoreDelta = Math.floor(amt / 500);
+  if (d.whalePct < 25) scoreDelta = Math.floor(scoreDelta * 2.2);
+  else if (d.whalePct > 70) scoreDelta = -Math.floor(scoreDelta * .5);
+  if (d.inactive > 60) scoreDelta = -Math.abs(scoreDelta);
+  decScore = Math.max(0, decScore + scoreDelta);
+  // Add facility if score enough
+  if (d.budget > 0 && decScore % 50 < 10 && facilities[idx].length < 5) {
+    const fIcos = ['🏪','🏬','🎪','🏗️','⚡','🌉','🎡','🏛️'];
+    facilities[idx].push({ico: fIcos[facilities[idx].length % fIcos.length], built: true, anim: 0});
+    showToast(`🏗️ ${d.n} に新施設が建設されました！`, 'gold');
+  }
+  // L1 boost
+  const cardano = l1Scores.find(x => x.isMe);
+  if (cardano) cardano.score += Math.max(scoreDelta, 0) * 8;
+  updateHUD(); updateStatus(); updateGalaxyRank();
+  document.getElementById('dp_amt').value = '';
+  document.getElementById('dp_slider').value = 0;
+  const toast = d.inactive > 60 ? `⚠️ ${d.n} は長期未投票！` : d.whalePct > 70 ? `🐋 クジラ支配の惑星へ委任...分散化スコアが下がります` : d.whalePct < 25 ? `✨ 分散した優良惑星！XP ×2.5 獲得！` : `🌟 ${d.n} に ${amt.toLocaleString()} ADA を委任しました！`;
+  showToast(toast, d.inactive > 60 || d.whalePct > 70 ? 'warn' : 'ok');
+}
+
+// ══════════════════════════════════════════════════════════
+// PARTICLES
+// ══════════════════════════════════════════════════════════
+function spawnParticles(x, y, type) {
+  const count = 24;
+  const colors = type === 'ok' ? ['rgba(52,211,153,', 'rgba(96,165,250,', 'rgba(167,139,250,'] : type === 'reduce' ? ['rgba(251,191,36,', 'rgba(249,115,22,', 'rgba(251,113,133,'] : ['rgba(251,113,133,', 'rgba(251,191,36,', 'rgba(249,115,22,'];
+  for (let i = 0; i < count; i++) {
+    const angle = (i / count) * Math.PI * 2;
+    const speed = Math.random() * 3.5 + 1;
+    particles.push({
+      x, y, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed - 1.5,
+      r: Math.random() * 4 + 1, life: 80 + Math.random() * 40,
+      color: colors[Math.floor(Math.random() * colors.length)] + '.8)'
+    });
+  }
+}
+function spawnVoteFire(x, y) {
+  for (let i = 0; i < 60; i++) {
+    const angle = Math.random() * Math.PI * 2, speed = Math.random() * 6 + 2;
+    const cols = ['rgba(251,191,36,','rgba(251,113,133,','rgba(167,139,250,','rgba(52,211,153,'];
+    particles.push({
+      x, y, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed - 3,
+      r: Math.random() * 6 + 2, life: 100 + Math.random() * 60,
+      color: cols[Math.floor(Math.random() * cols.length)] + '.9)'
+    });
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+// XP & LEVELS
+// ══════════════════════════════════════════════════════════
+function addXP(amount) {
+  xp += amount;
+  const prevLevel = level;
+  for (let i = LEVELS.length - 1; i >= 0; i--) {
+    if (xp >= LEVELS[i].min) { level = i; break; }
+  }
+  if (level > prevLevel) showLevelUp();
+  updateHUD();
+}
+function showLevelUp() {
+  const lv = LEVELS[level];
+  document.getElementById('lvl_star').textContent = lv.stars;
+  document.getElementById('lvl_title').textContent = 'LEVEL ' + (level + 1) + '!';
+  document.getElementById('lvl_name').textContent = lv.name.toUpperCase();
+  document.getElementById('lvlUp').classList.add('show');
+  spawnVoteFire(cW / 2, cH / 2);
+}
+function closeLvlUp() { document.getElementById('lvlUp').classList.remove('show'); }
+
+// ══════════════════════════════════════════════════════════
+// HUD
+// ══════════════════════════════════════════════════════════
+function updateHUD() {
+  const rem = getRemaining(), del = totalADA - rem;
+  const lv = LEVELS[level];
+  const nextMin = LEVELS[Math.min(level + 1, LEVELS.length - 1)].min;
+  const xpPct = level >= LEVELS.length - 1 ? 100 : Math.min((xp - lv.min) / (nextMin - lv.min) * 100, 100);
+  document.getElementById('hud_char').textContent = CHAR_EMO[charType] + ' ' + ({shrimp:'エビ',dolphin:'イルカ',whale:'クジラ'}[charType]);
+  // update galaxy economy display in HUD
+  if(document.getElementById('hud_revenue')) document.getElementById('hud_revenue').textContent = '₳'+(galaxyEconomy.chainRevenue/1000).toFixed(1)+'K';
+  document.getElementById('hud_ada').textContent = rem.toLocaleString();
+  document.getElementById('hud_del').textContent = del.toLocaleString();
+  document.getElementById('hud_score').textContent = decScore;
+  document.getElementById('hud_tier').textContent = lv.tier;
+  document.getElementById('hud_xpfill').style.width = xpPct + '%';
+  document.getElementById('hud_xplbl').textContent = `Lv.${level + 1} — ${xp} / ${nextMin} XP`;
+}
+
+// ══════════════════════════════════════════════════════════
+// STATUS DIAGNOSIS
+// ══════════════════════════════════════════════════════════
+function updateStatus() {
+  const el = document.getElementById('statusList'); el.innerHTML = '';
+  const total = delegations.reduce((s, d) => s + d.ada, 0);
+  const items = [];
+  if (delegations.length === 0) {
+    items.push({type:'info', head:'💡 惑星を選んで委任しよう', desc:'ADAを委任することでガバナンスに参加できます。惑星をクリックして詳細を確認！'});
+  } else {
+    if (total < totalADA * .15) {
+      items.push({type:'info', head:'🌱 小規模に委任中', desc:`${total.toLocaleString()} ADA 委任中。少額でも分散して委任するとXPボーナス！`});
+    } else if (total >= totalADA * .5) {
+      items.push({type:'ok', head:'✅ 積極的に委任中！', desc:`${total.toLocaleString()} ADA 委任。銀河の成長に大きく貢献中！`});
+    }
+    const bigConc = delegations.filter(d => DREPS[d.drepIdx].p > 5);
+    if (bigConc.length > 0) {
+      items.push({type:'warn', head:'⚠️ 大規模DRepへ集中委任', desc:`${DREPS[bigConc[0].drepIdx].n} は高集中DRep。他への分散を推奨します`});
+    }
+    const inactive = delegations.filter(d => DREPS[d.drepIdx].inactive > 60);
+    if (inactive.length > 0) {
+      items.push({type:'warn', head:'🔴 長期未投票DRepあり', desc:`${DREPS[inactive[0].drepIdx].n} は${DREPS[inactive[0].drepIdx].inactive}日間未投票。移動を検討してください`});
+    }
+    const highWhale = delegations.filter(d => DREPS[d.drepIdx].whalePct > 70);
+    if (highWhale.length > 0) {
+      items.push({type:'warn', head:'🐋 クジラ支配の惑星あり', desc:`${DREPS[highWhale[0].drepIdx].n} はクジラ${DREPS[highWhale[0].drepIdx].whalePct}%。意思決定が少数に集中しています`});
+    }
+    const goodDels = delegations.filter(d => DREPS[d.drepIdx].whalePct < 25 && !DREPS[d.drepIdx].inactive);
+    if (goodDels.length >= 2) {
+      items.push({type:'ok', head:'💎 優良な分散委任！', desc:`クジラの少ない優良DRepへの分散委任！XPボーナス継続中`});
+    }
+    if (delegations.length >= 3) {
+      items.push({type:'ok', head:'🌌 銀河の守護者！', desc:'3つ以上のDRepに分散委任。Cardanoエコシステムの健全化に最大貢献中！'});
+    }
+  }
+  if (items.length === 0) items.push({type:'info', head:'📡 委任状況を確認中...', desc:'惑星に委任してステータスを獲得しよう'});
+  items.slice(0, 3).forEach(item => {
+    const div = document.createElement('div'); div.className = 'sp-item ' + item.type;
+    div.innerHTML = `<div class="sp-head">${item.head}</div><div class="sp-desc">${item.desc}</div>`;
+    el.appendChild(div);
+  });
+}
+
+// ══════════════════════════════════════════════════════════
+// GALAXY RANK
+// ══════════════════════════════════════════════════════════
+function updateGalaxyRank() {
+  const sorted = [...l1Scores].sort((a, b) => b.score - a.score);
+  const el = document.getElementById('galaxyRank'); el.innerHTML = '';
+  sorted.forEach((l, rank) => {
+    const div = document.createElement('div'); div.className = 'gp-item' + (l.isMe ? ' me' : '');
+    const scoreDiff = rank > 0 ? sorted[rank-1].score - l.score : null;
+    div.innerHTML = `<div class="gp-rank">#${rank + 1}</div>
+      <div class="gp-ico">${l.ico}</div>
+      <div class="gp-name" style="flex:1">${l.name}</div>
+      <div style="text-align:right">
+        <div class="gp-score">${(l.score/100).toFixed(0)}M</div>
+        ${scoreDiff ? `<div style="font-size:7px;color:rgba(251,113,133,.7);font-family:Orbitron,monospace">-${(scoreDiff/100).toFixed(0)}M</div>` : `<div style="font-size:7px;color:rgba(52,211,153,.7);font-family:Orbitron,monospace">👑 首位</div>`}
+      </div>`;
+    el.appendChild(div);
+  });
+}
+// L1 ecosystems have their own internal economy cycles
+const L1_EVENTS = [
+  {chain:'Ethereum', msg:'⬡ ETHがL2エコシステム拡大中！ TVL急増', boost: 1.8},
+  {chain:'Solana',   msg:'◎ SOLがDeFi新興プロジェクトを大量誘致！', boost: 2.2},
+  {chain:'Avalanche',msg:'△ AVAXがゲームチェーンとして急成長中！', boost: 1.5},
+  {chain:'Polkadot', msg:'⬡ DOTのパラチェーン新規接続でエコシステム拡大', boost: 1.4},
+];
+let l1EventCooldown = 0;
+function growL1() {
+  l1EventCooldown--;
+  // Base growth — each chain has momentum and noise
+  l1Scores.forEach(l => {
+    if (l.isMe) return;
+    // Each chain grows with its own velocity + random variance
+    const momentum = l.growth * (100 + Math.random() * 80);
+    // Random surge events per chain
+    const surge = Math.random() < .08 ? l.growth * 400 : 0;
+    l.score += Math.floor(momentum + surge);
+    // Economy cycles: occasionally dip
+    if (Math.random() < .05) l.score = Math.max(l.score - Math.floor(l.growth * 200), 100);
+  });
+
+  // Periodic random L1 event
+  if (l1EventCooldown <= 0 && Math.random() < .35) {
+    const ev = L1_EVENTS[Math.floor(Math.random() * L1_EVENTS.length)];
+    const target = l1Scores.find(l => l.name === ev.chain);
+    if (target) {
+      target.score += Math.floor(target.growth * 600 * ev.boost);
+      showToast(ev.msg, 'warn');
+    }
+    l1EventCooldown = 4;
+  }
+
+  // Cardano rank check — urgent messages
+  const sorted = [...l1Scores].sort((a, b) => b.score - a.score);
+  const rank = sorted.findIndex(x => x.isMe);
+  const cardano = l1Scores.find(x => x.isMe);
+  const ahead = sorted[rank - 1];
+  const behind = sorted[rank + 1];
+
+  if (rank >= 3 && Math.random() < .5) {
+    showToast('🚨 Cardanoが4位以下に！施設を建てて銀河を発展させよう', 'warn');
+  } else if (rank >= 1 && ahead && (ahead.score - cardano.score) < ahead.score * .12 && Math.random() < .4) {
+    showToast(`⚡ ${ahead.name} まであと僅か！委任を増やして追い上げろ！`, 'warn');
+  } else if (rank === 0 && Math.random() < .2) {
+    showToast('🏆 Cardano銀河が首位！この調子で維持しよう！', 'ok');
+  }
+  if (behind && (cardano.score - behind.score) < cardano.score * .08 && Math.random() < .3) {
+    showToast(`⚠️ ${behind.name} が迫ってきた！委任を増やして差を広げよう`, 'warn');
+  }
+  updateGalaxyRank();
+}
+
+// ══════════════════════════════════════════════════════════
+// VOTE EVENTS
+// ══════════════════════════════════════════════════════════
+function triggerVoteEvent() {
+  if (voteActive || delegations.length === 0) { setTimeout(triggerVoteEvent, 15000); return; }
+  voteActive = true;
+  const prop = PROPOSALS[Math.floor(Math.random() * PROPOSALS.length)];
+  document.getElementById('vp_sub').textContent = 'DRepたちが予算の使い道を議決中...';
+  document.getElementById('vp_pname').textContent = prop.name;
+  document.getElementById('vp_pdesc').textContent = prop.desc;
+  document.getElementById('vp_budget').textContent = prop.budget;
+  document.getElementById('vp_result').style.display = 'none';
+  document.getElementById('votePanel').classList.add('show');
+  // Calculate vote outcome based on decentralization
+  const decFactor = Math.min(decScore / 200, 1);
+  const targetYes = 35 + decFactor * 45; // 35-80% based on score
+  let currentYes = 0;
+  const interval = setInterval(() => {
+    currentYes = Math.min(currentYes + (Math.random() * 3 + 1), targetYes + Math.random() * 10);
+    const yes = Math.min(Math.round(currentYes), 100);
+    document.getElementById('vp_yesbar').style.width = yes + '%';
+    document.getElementById('vp_yes').textContent = yes;
+    document.getElementById('vp_no').textContent = 100 - yes;
+    if (currentYes >= targetYes + 5) {
+      clearInterval(interval);
+      const passed = yes > 50;
+      const res = document.getElementById('vp_result');
+      res.style.display = 'block';
+      res.className = 'vote-result ' + (passed ? 'pass' : 'fail');
+      res.textContent = passed ? '✅ 可決！施設建設スタート！' : '❌ 否決。分散化が足りません';
+      if (passed) {
+        addXP(prop.xpBonus); decScore += prop.scoreBonus;
+        const cardano = l1Scores.find(x => x.isMe);
+        if (cardano) cardano.score += prop.scoreBonus * 15;
+        // Big particle burst
+        bubbles.filter((_, i) => delegations.some(d => d.drepIdx === i)).forEach(b => spawnVoteFire(b.x, b.y));
+        updateHUD(); updateGalaxyRank();
+        setTimeout(() => showToast(`🎊 ${prop.name} が可決！銀河が発展します！`, 'gold'), 500);
+      }
+    }
+  }, 60);
+  setTimeout(triggerVoteEvent, 25000 + Math.random() * 15000);
+}
+function closeVote() {
+  document.getElementById('votePanel').classList.remove('show');
+  voteActive = false;
+}
+
+// ══════════════════════════════════════════════════════════
+// TOAST
+// ══════════════════════════════════════════════════════════
+let toastTimer = null;
+function showToast(msg, type = 'ok') {
+  const el = document.getElementById('gtoast');
+  el.textContent = msg; el.className = 'gtoast ' + type;
+  void el.offsetWidth; el.classList.add('show');
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 4000);
+}
+</script>
+</body>
+</html>
