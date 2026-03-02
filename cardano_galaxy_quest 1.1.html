@@ -1,0 +1,3513 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>CARDANO GALAXY QUEST</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --g:#00ff88;--g2:#00cc66;--a:#ffaa00;--r:#ff3355;--b:#00aaff;--c:#00ffee;
+  --bg:#020609;--panel:rgba(2,10,16,.97);--brd:rgba(0,255,136,.14);--brd2:rgba(0,255,136,.36);
+  --dim:rgba(0,255,136,.35);--dim2:rgba(0,255,136,.09);
+  --mono:'Share Tech Mono',monospace;--orb:'Orbitron',monospace;
+}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-family:var(--mono);color:var(--g);}
+body::before{content:'';position:fixed;inset:0;z-index:9000;pointer-events:none;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.05) 2px,rgba(0,0,0,.05) 4px);}
+body::after{content:'';position:fixed;inset:0;z-index:9001;pointer-events:none;
+  background:radial-gradient(ellipse 130% 130% at 50% 50%,transparent 45%,rgba(0,0,0,.4) 100%);}
+.scr{position:fixed;inset:0;display:none;z-index:1;}
+.scr.on{display:flex;}
+#bootScr{align-items:center;justify-content:center;z-index:10;}
+#game{flex-direction:column;width:100%;height:100%;}
+
+/* ─── BOOT ─── */
+.bw{width:min(580px,93vw);border:1px solid var(--brd2);background:rgba(0,8,14,.99);position:relative;padding:30px 38px;}
+.bc{position:absolute;width:14px;height:14px;border-style:solid;border-color:var(--g);}
+.bc.tl{top:-1px;left:-1px;border-width:2px 0 0 2px;}.bc.tr{top:-1px;right:-1px;border-width:2px 2px 0 0;}
+.bc.bl{bottom:-1px;left:-1px;border-width:0 0 2px 2px;}.bc.br{bottom:-1px;right:-1px;border-width:0 2px 2px 0;}
+.bsc{position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--g),transparent);animation:bsc 4s linear infinite;opacity:.25;}
+@keyframes bsc{from{top:0}to{top:100%}}
+.bsys{font-size:7px;color:var(--dim);letter-spacing:3px;margin-bottom:22px;}
+.blogo{font-family:var(--orb);font-size:clamp(20px,3.8vw,36px);font-weight:900;color:var(--g);
+  letter-spacing:5px;line-height:1.1;margin-bottom:5px;text-shadow:0 0 20px rgba(0,255,136,.5);}
+.bsub{font-size:9px;color:var(--a);letter-spacing:5px;margin-bottom:26px;}
+.bdv{height:1px;background:linear-gradient(90deg,transparent,var(--brd2),transparent);margin:16px 0;}
+.blbl{font-size:7px;color:var(--dim);letter-spacing:3px;margin-bottom:10px;}
+.chars{display:flex;gap:8px;margin-bottom:20px;}
+.cbtn{flex:1;border:1px solid var(--brd);background:transparent;color:var(--g);
+  font-family:var(--mono);padding:12px 8px;cursor:pointer;transition:all .2s;text-align:center;}
+.cbtn:hover,.cbtn.sel{border-color:var(--g);background:var(--dim2);}
+.cico{font-size:26px;display:block;margin-bottom:6px;}
+.ccls{font-size:6px;color:var(--dim);letter-spacing:2px;}.cnm{font-family:var(--orb);font-size:11px;font-weight:700;margin-bottom:2px;}
+.cdsc{font-size:7px;color:var(--dim);margin-top:4px;line-height:1.5;}
+.blaunch{width:100%;padding:10px;font-family:var(--orb);font-size:11px;font-weight:700;letter-spacing:4px;
+  background:transparent;border:1px solid var(--g2);color:var(--g);cursor:pointer;transition:all .2s;}
+.blaunch:hover:not(:disabled){background:var(--dim2);box-shadow:0 0 24px rgba(0,255,136,.15);}
+.blaunch:disabled{opacity:.25;cursor:default;}
+
+/* ─── ADVISOR PANEL ─── */
+#advisorPanel{
+  position:absolute;left:0;top:32px;bottom:0;width:200px;z-index:200;
+  background:rgba(2,8,14,.97);border-right:1px solid var(--brd2);
+  display:flex;flex-direction:column;overflow:hidden;
+  transform:translateX(-100%);transition:transform .3s ease;
+}
+#advisorPanel.open{transform:translateX(0);}
+.ap-hdr{padding:6px 10px;border-bottom:1px solid var(--brd);flex-shrink:0;}
+.ap-title{font-family:var(--orb);font-size:7px;letter-spacing:2px;color:var(--g);}
+.ap-sub{font-size:5px;color:var(--dim);}
+.ap-tabs{display:flex;border-bottom:1px solid var(--brd);flex-shrink:0;}
+.aptab{flex:1;padding:5px 2px;font-family:var(--orb);font-size:5.5px;letter-spacing:.5px;
+  text-align:center;cursor:pointer;color:var(--dim);border-right:1px solid var(--brd);
+  background:transparent;transition:.18s;}
+.aptab:last-child{border-right:none;}
+.aptab.on{color:var(--g);background:rgba(0,255,136,.06);border-bottom:2px solid var(--g);}
+.ap-advisor{padding:8px 10px;border-bottom:1px solid var(--brd);flex-shrink:0;
+  display:flex;align-items:center;gap:7px;}
+.ap-avatar{width:38px;height:38px;border:1px solid var(--brd2);background:rgba(0,255,136,.04);
+  display:flex;align-items:center;justify-content:center;font-size:18px;
+  flex-shrink:0;position:relative;}
+.ap-avatar::before{content:'';position:absolute;inset:-3px;border:1px solid var(--brd);
+  animation:avspin 10s linear infinite;}
+@keyframes avspin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+.ap-name{font-family:var(--orb);font-size:9px;font-weight:700;color:var(--c);margin-bottom:1px;}
+.ap-role{font-size:5.5px;color:var(--dim);letter-spacing:.5px;margin-bottom:3px;}
+.ap-status{display:flex;align-items:center;gap:3px;}
+.ap-dot{width:5px;height:5px;border-radius:50%;background:var(--g);
+  animation:apdot 1.5s infinite;flex-shrink:0;}
+@keyframes apdot{0%,100%{opacity:1}50%{opacity:.2}}
+#ap_status_lbl{font-size:6px;color:var(--g);}
+.ap-log{flex:1;overflow-y:auto;padding:6px 8px;display:flex;flex-direction:column;gap:5px;}
+.ap-log::-webkit-scrollbar{width:2px;}.ap-log::-webkit-scrollbar-thumb{background:var(--brd2);}
+.ap-empty{font-size:7px;color:var(--dim);text-align:center;padding:20px 6px;line-height:2;}
+/* セリフバブル */
+.ap-bubble{background:rgba(0,255,136,.03);border:1px solid var(--brd);
+  border-left:2px solid var(--g);padding:6px 8px;animation:bubblein .3s ease;}
+.ap-bubble.sheyla{border-left-color:var(--c);}
+.ap-bubble.vasil{border-left-color:var(--a);}
+.ap-bubble.uroboros{border-left-color:#e879f9;}
+.ap-bubble.alert{border-left-color:var(--r);background:rgba(255,51,85,.05);
+  animation:bubblein .3s ease,alertglow 2s infinite;}
+@keyframes bubblein{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+@keyframes alertglow{0%,100%{border-left-color:rgba(255,51,85,.5)}50%{border-left-color:var(--r)}}
+.ap-bubble-who{font-family:var(--orb);font-size:5.5px;letter-spacing:1px;margin-bottom:2px;}
+.ap-bubble .ap-bubble-who{color:var(--g);}
+.ap-bubble.sheyla .ap-bubble-who{color:var(--c);}
+.ap-bubble.vasil .ap-bubble-who{color:var(--a);}
+.ap-bubble.uroboros .ap-bubble-who{color:#e879f9;}
+.ap-bubble.alert .ap-bubble-who{color:var(--r);}
+.ap-bubble-text{font-size:6.5px;color:rgba(255,255,255,.75);line-height:1.6;}
+.ap-bubble-text em{color:var(--a);font-style:normal;font-family:var(--orb);}
+/* フェーズ */
+.ap-phase{padding:6px 10px;border-top:1px solid var(--brd);flex-shrink:0;
+  background:rgba(0,255,238,.02);}
+.ap-phase-lbl{font-size:5px;color:var(--dim);letter-spacing:2px;font-family:var(--orb);margin-bottom:3px;}
+.ap-phase-tag{font-family:var(--orb);font-size:8px;font-weight:700;color:var(--c);letter-spacing:2px;
+  margin-bottom:2px;text-shadow:0 0 8px rgba(0,255,238,.4);}
+.ap-phase-desc{font-size:6px;color:var(--dim);}
+/* 左パネル開閉ボタン */
+#apToggle{position:absolute;left:0;top:calc(50% - 30px);z-index:201;
+  width:18px;height:60px;background:rgba(2,8,14,.95);border:1px solid var(--brd2);
+  border-left:none;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:left .3s ease;}
+#apToggle.open{left:200px;}
+#apToggle-lbl{font-family:var(--orb);font-size:6px;writing-mode:vertical-rl;
+  color:var(--c);letter-spacing:2px;}
+/* NAKAMOTO ALERTバナー */
+#nakAlert{position:absolute;top:32px;left:0;right:0;z-index:302;
+  background:linear-gradient(90deg,rgba(255,51,85,.95),rgba(200,50,80,.95));
+  padding:5px 14px;display:none;align-items:center;gap:10px;}
+#nakAlert.on{display:flex;}
+.na-ico{font-size:14px;animation:nashake .25s infinite;}
+@keyframes nashake{0%,100%{transform:rotate(-4deg)}50%{transform:rotate(4deg)}}
+.na-txt{font-family:var(--orb);font-size:8px;font-weight:700;letter-spacing:2px;color:#fff;}
+.na-val{font-family:var(--orb);font-size:11px;font-weight:900;color:#fff;}
+.na-dismiss{margin-left:auto;padding:3px 10px;border:1px solid rgba(255,255,255,.4);
+  background:transparent;color:#fff;font-family:var(--orb);font-size:6px;cursor:pointer;
+  letter-spacing:1px;}
+/* 無意識指揮官フロー (赤い流れ) */
+.unconscious-flow{position:absolute;pointer-events:none;z-index:2;}
+/* ─── MAIN ─── */
+#mainArea{position:relative;flex:1;min-height:0;}
+#starC,#mainC{position:absolute;inset:0;}
+#starC{z-index:0;}#mainC{z-index:1;cursor:grab;}
+
+/* TOP HUD */
+#topHud{position:absolute;top:0;left:0;right:0;z-index:5;height:32px;
+  background:linear-gradient(180deg,rgba(2,8,14,.97) 0%,transparent 100%);
+  display:flex;align-items:center;border-bottom:1px solid var(--brd);}
+.hs{display:flex;align-items:center;gap:6px;padding:0 9px;height:100%;border-right:1px solid var(--brd);}
+.hs:last-child{border-right:none;}
+.hlbl{font-size:6px;color:var(--dim);letter-spacing:1.5px;display:block;}
+.hval{font-family:var(--orb);font-size:10px;font-weight:700;}
+.hval.g{color:var(--g);}.hval.a{color:var(--a);}.hval.c{color:var(--c);}
+.hid{font-family:var(--orb);font-size:9px;font-weight:900;color:var(--g);letter-spacing:3px;text-shadow:0 0 8px rgba(0,255,136,.4);}
+.xpw{display:flex;flex-direction:column;gap:2px;flex:1;min-width:80px;}
+.xpt{height:3px;background:rgba(0,255,136,.07);}
+.xpf{height:100%;background:linear-gradient(90deg,var(--g2),var(--c));transition:width .5s;}
+.exitb{font-family:var(--orb);font-size:7px;letter-spacing:2px;padding:4px 8px;
+  background:transparent;border:1px solid var(--brd);color:var(--dim);cursor:pointer;transition:.2s;}
+.exitb:hover{border-color:var(--r);color:var(--r);}
+
+/* CHAIN TABS */
+#chainTabs{position:absolute;top:36px;left:8px;z-index:5;display:flex;flex-direction:column;gap:2px;}
+.ctab{font-family:var(--orb);font-size:7px;font-weight:700;letter-spacing:1px;padding:4px 7px;
+  border:1px solid var(--brd);background:rgba(0,8,14,.92);color:var(--dim);cursor:pointer;transition:.18s;white-space:nowrap;}
+.ctab:hover,.ctab.on{border-color:var(--g);color:var(--g);background:var(--dim2);}
+
+/* L1 RADAR */
+#l1Radar{position:absolute;top:36px;right:10px;z-index:5;cursor:pointer;}
+.rlbl{font-size:6px;color:var(--dim);letter-spacing:2px;text-align:center;margin-top:2px;font-family:var(--orb);}
+
+/* ZOOM */
+#zoomC{position:absolute;bottom:8px;right:10px;z-index:5;display:flex;flex-direction:column;gap:2px;}
+.zbtn{width:22px;height:22px;border:1px solid var(--brd);background:rgba(0,8,14,.9);color:var(--g);
+  font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.18s;font-family:var(--orb);}
+.zbtn:hover{border-color:var(--g);background:var(--dim2);}
+
+/* HOVER TOOLTIP */
+#htip{position:fixed;z-index:300;background:rgba(2,8,14,.98);border:1px solid var(--brd2);width:228px;pointer-events:none;display:none;}
+#htip.on{display:block;}
+#htip::before,#htip::after{content:'';position:absolute;width:9px;height:9px;border-style:solid;border-color:var(--g);}
+#htip::before{top:-1px;left:-1px;border-width:2px 0 0 2px;}
+#htip::after{bottom:-1px;right:-1px;border-width:0 2px 2px 0;}
+.th{padding:5px 8px;border-bottom:1px solid var(--brd);background:rgba(0,255,136,.03);display:flex;justify-content:space-between;align-items:center;}
+.thnm{font-family:var(--orb);font-size:10px;font-weight:700;color:var(--g);}
+.thtp{font-size:6px;color:var(--a);}
+.tb{padding:6px 8px;}
+.tr2{display:flex;justify-content:space-between;margin-bottom:3px;align-items:center;}
+.tl{font-size:6px;color:var(--dim);}.tv{font-family:var(--orb);font-size:9px;font-weight:700;}
+.twbar{height:4px;background:rgba(255,255,255,.05);margin:4px 0;}
+.twfill{height:100%;}
+.twrn{font-size:7px;padding:3px 5px;border-left:2px solid var(--r);background:rgba(255,51,85,.08);color:var(--r);margin-bottom:3px;display:none;}
+.tcmt{font-size:7px;color:var(--dim);line-height:1.5;border-top:1px solid var(--brd);padding-top:4px;margin-top:3px;}
+.thint{font-size:7px;color:var(--g);text-align:center;padding:4px;border-top:1px solid var(--brd);background:rgba(0,255,136,.03);letter-spacing:1px;}
+
+/* ─── BOTTOM PANEL ─── */
+#bp{height:26vh;min-height:152px;max-height:220px;border-top:1px solid var(--brd2);
+  background:var(--panel);display:grid;grid-template-columns:1fr 2fr 1fr;flex-shrink:0;}
+.bsect{padding:7px 11px;border-right:1px solid var(--brd);display:flex;flex-direction:column;overflow:hidden;}
+.bsect:last-child{border-right:none;}
+.bshdr{font-family:var(--orb);font-size:7px;font-weight:700;letter-spacing:3px;color:var(--g);
+  margin-bottom:5px;display:flex;align-items:center;gap:5px;flex-shrink:0;}
+.bshdr::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--g);box-shadow:0 0 6px var(--g);animation:blk 2s infinite;}
+.bshdr.am::before{background:var(--a);box-shadow:0 0 6px var(--a);}.bshdr.cy::before{background:var(--c);box-shadow:0 0 6px var(--c);}
+@keyframes blk{0%,100%{opacity:1}50%{opacity:.2}}
+
+/* PARAM BARS */
+.pbars{display:flex;flex-direction:column;gap:3px;flex:1;overflow:hidden;}
+.pbrow{display:flex;align-items:center;gap:5px;}
+.pblbl{font-size:6px;color:var(--dim);letter-spacing:1px;width:56px;flex-shrink:0;font-family:var(--orb);}
+.pbtrk{flex:1;height:6px;background:rgba(255,255,255,.04);overflow:hidden;}
+.pbfill{height:100%;transition:width .7s ease;position:relative;}
+.pbfill::after{content:'';position:absolute;right:0;top:0;bottom:0;width:2px;background:rgba(255,255,255,.45);}
+.pbval{font-size:7px;color:var(--dim);width:48px;text-align:right;font-family:var(--orb);flex-shrink:0;}
+
+/* CONSOLE */
+.dmode{display:flex;border:1px solid var(--brd);margin-bottom:5px;flex-shrink:0;}
+.dmbtn{flex:1;padding:5px;font-family:var(--orb);font-size:7px;letter-spacing:1px;background:transparent;border:none;color:var(--dim);cursor:pointer;transition:.18s;}
+.dmbtn:last-child{border-left:1px solid var(--brd);}
+.dmbtn.on.dep{background:rgba(0,255,136,.1);color:var(--g);}
+.dmbtn.on.rec{background:rgba(255,51,85,.08);color:var(--r);}
+.dselrow{display:flex;gap:5px;margin-bottom:5px;flex-shrink:0;}
+.dsel{flex:1;background:rgba(0,0,0,.5);border:1px solid var(--brd);color:var(--g);font-family:var(--mono);font-size:9px;padding:4px 6px;outline:none;min-width:0;}
+.dsel option{background:#040c12;}
+.damt{width:80px;background:var(--dim2);border:1px solid var(--brd2);color:var(--g);font-family:var(--orb);font-size:10px;padding:4px 6px;outline:none;text-align:right;flex-shrink:0;}
+.dhint{font-size:7px;color:var(--dim);margin-bottom:4px;flex-shrink:0;display:none;}
+.dhint span{color:var(--a);font-family:var(--orb);}
+input[type=range].dslider{-webkit-appearance:none;width:100%;height:4px;background:rgba(0,255,136,.07);outline:none;cursor:pointer;margin-bottom:5px;flex-shrink:0;}
+input[type=range].dslider::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;background:var(--g);border:1px solid #020609;box-shadow:0 0 7px rgba(0,255,136,.7);cursor:pointer;}
+.dpcts{display:flex;gap:3px;margin-bottom:5px;flex-shrink:0;}
+.dpct{flex:1;padding:3px;background:transparent;border:1px solid var(--brd);color:var(--dim);font-family:var(--orb);font-size:7px;cursor:pointer;transition:.18s;text-align:center;}
+.dpct:hover{background:var(--dim2);border-color:var(--g);color:var(--g);}
+.dexec{padding:7px;font-family:var(--orb);font-size:10px;font-weight:700;letter-spacing:3px;cursor:pointer;border:1px solid;transition:all .2s;width:100%;flex-shrink:0;}
+.dexec.dep{background:var(--dim2);border-color:var(--g2);color:var(--g);}
+.dexec.dep:hover:not(:disabled){background:rgba(0,255,136,.14);}
+.dexec.rec{background:rgba(255,51,85,.06);border-color:var(--r);color:var(--r);}
+.dexec.rec:hover:not(:disabled){background:rgba(255,51,85,.14);}
+.dexec:disabled{opacity:.3;cursor:default;}
+.rdmsg{font-size:7px;color:var(--a);text-align:center;padding:3px;letter-spacing:1px;border:1px solid rgba(255,170,0,.3);background:rgba(255,170,0,.05);display:none;margin-top:4px;}
+
+/* STATUS */
+.slist{display:flex;flex-direction:column;gap:3px;overflow-y:auto;flex:1;}
+.slist::-webkit-scrollbar{width:2px;}.slist::-webkit-scrollbar-thumb{background:var(--brd);}
+.si{border-left:2px solid;padding:3px 6px;}
+.si.ok{border-color:var(--g);background:rgba(0,255,136,.03);}
+.si.warn{border-color:var(--r);background:rgba(255,51,85,.06);}
+.si.info{border-color:var(--b);background:rgba(0,170,255,.04);}
+.si.cau{border-color:var(--a);background:rgba(255,170,0,.05);}
+.sih{font-size:7px;font-weight:700;font-family:var(--orb);}
+.si.ok .sih{color:var(--g);}.si.warn .sih{color:var(--r);}.si.info .sih{color:var(--b);}.si.cau .sih{color:var(--a);}
+.sib{font-size:6px;color:var(--dim);line-height:1.4;margin-top:1px;}
+.dchips{display:flex;flex-direction:column;gap:2px;overflow-y:auto;max-height:55px;margin-top:4px;flex-shrink:0;}
+.dchip{display:flex;align-items:center;gap:5px;padding:2px 5px;border:1px solid var(--brd);}
+.dcnm{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:8px;color:var(--g);}
+.dcada{font-family:var(--orb);font-size:7px;color:var(--a);}
+
+/* VOTE */
+.vmod{position:fixed;inset:0;z-index:600;background:rgba(0,0,0,.78);display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
+.vmod.on{display:flex;}
+.vbox{width:min(430px,91vw);border:1px solid var(--a);background:rgba(2,8,14,.99);}
+.vhdr{padding:8px 12px;border-bottom:1px solid rgba(255,170,0,.24);background:rgba(255,170,0,.03);display:flex;align-items:center;gap:7px;}
+.vdot{width:6px;height:6px;border-radius:50%;background:var(--a);box-shadow:0 0 7px var(--a);animation:blk .8s infinite;}
+.vtit{font-family:var(--orb);font-size:9px;letter-spacing:3px;color:var(--a);}
+.vbody{padding:12px;}
+.vpnm{font-family:var(--orb);font-size:12px;color:#fff;margin-bottom:3px;}
+.vpdsc{font-size:8px;color:var(--dim);line-height:1.6;margin-bottom:5px;}
+.vpbdg{font-family:var(--orb);font-size:9px;color:var(--a);margin-bottom:10px;}
+.vbar{height:7px;background:rgba(255,255,255,.04);}
+.vyes{height:100%;background:linear-gradient(90deg,var(--g2),var(--c));transition:width .9s cubic-bezier(.4,0,.2,1);}
+.vstats{display:flex;justify-content:space-between;margin-top:3px;font-family:var(--orb);font-size:7px;}
+.vres{padding:7px 9px;margin-top:9px;font-family:var(--orb);font-size:10px;letter-spacing:2px;text-align:center;display:none;}
+.vres.pass{background:rgba(0,255,136,.06);border:1px solid var(--g2);color:var(--g);}
+.vres.fail{background:rgba(255,51,85,.07);border:1px solid var(--r);color:var(--r);}
+.vcls{width:100%;margin-top:7px;padding:6px;font-family:var(--orb);font-size:7px;letter-spacing:2px;background:transparent;border:1px solid var(--brd);color:var(--dim);cursor:pointer;}
+.vcls:hover{border-color:var(--g);color:var(--g);}
+
+/* ─── GOVERNANCE SIDE PANEL ─── */
+#govPanel{position:fixed;right:0;top:32px;bottom:26vh;min-height:0;width:300px;z-index:400;
+  background:rgba(2,6,12,.98);border-left:1px solid var(--brd2);
+  display:flex;flex-direction:column;transform:translateX(100%);transition:transform .32s cubic-bezier(.4,0,.2,1);}
+#govPanel.open{transform:translateX(0);}
+.gpbtn{position:absolute;left:-28px;top:50%;transform:translateY(-50%);
+  width:28px;height:64px;background:rgba(2,6,12,.97);border:1px solid var(--brd2);
+  border-right:none;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  font-size:10px;color:var(--a);writing-mode:vertical-rl;letter-spacing:2px;
+  font-family:var(--orb);font-size:7px;}
+.gpbtn:hover{background:rgba(0,255,136,.06);color:var(--g);}
+.gpbadge{position:absolute;left:-12px;top:5px;width:16px;height:16px;
+  background:var(--r);border-radius:50%;display:none;align-items:center;justify-content:center;
+  font-size:8px;font-family:var(--orb);font-weight:700;color:#fff;}
+.gpbadge.on{display:flex;}
+.gphdr{padding:8px 10px 6px;border-bottom:1px solid var(--brd);flex-shrink:0;}
+.gphtit{font-family:var(--orb);font-size:8px;letter-spacing:3px;color:var(--g);margin-bottom:2px;}
+.gphsub{font-size:7px;color:var(--dim);}
+/* ACTIVE VOTE */
+#activeVote{padding:8px 10px;border-bottom:1px solid var(--brd);flex-shrink:0;display:none;}
+#activeVote.on{display:block;}
+.avlbl{font-size:6px;color:var(--a);letter-spacing:2px;margin-bottom:3px;font-family:var(--orb);}
+.avnm{font-family:var(--orb);font-size:9px;color:#fff;margin-bottom:2px;}
+.avdsc{font-size:7px;color:var(--dim);margin-bottom:5px;line-height:1.4;}
+.avbar{height:5px;background:rgba(255,255,255,.05);margin-bottom:3px;}
+.avfill{height:100%;background:linear-gradient(90deg,var(--g2),var(--c));transition:width .8s;}
+.avstats{display:flex;justify-content:space-between;font-family:var(--orb);font-size:7px;}
+/* HISTORY */
+.gphist{flex:1;overflow-y:scroll;padding:6px 8px;display:flex;flex-direction:column;gap:8px;}
+.gphist::-webkit-scrollbar{width:4px;background:rgba(0,255,136,.04);}
+.gphist::-webkit-scrollbar-thumb{background:var(--brd2);border-radius:2px;}
+/* 収支サマリーバー */
+#govSummary{padding:6px 10px;border-bottom:1px solid var(--brd);flex-shrink:0;background:rgba(0,0,0,.3);}
+.gsrow{display:flex;gap:4px;margin-bottom:4px;}
+.gsbadge{flex:1;padding:4px 6px;display:flex;flex-direction:column;gap:1px;border:1px solid;}
+.gsbadge.spend{border-color:rgba(255,51,85,.35);background:rgba(255,51,85,.07);}
+.gsbadge.earn{border-color:rgba(0,255,136,.35);background:rgba(0,255,136,.06);}
+.gsbadge.tvl{border-color:rgba(0,200,255,.35);background:rgba(0,200,255,.06);}
+.gsbadge.net{border-color:rgba(255,170,0,.35);background:rgba(255,170,0,.06);}
+.gs-lbl{font-size:5px;letter-spacing:1.5px;font-family:var(--orb);}
+.gsbadge.spend .gs-lbl{color:rgba(255,80,80,.7);}
+.gsbadge.earn .gs-lbl{color:rgba(0,255,136,.6);}
+.gsbadge.tvl .gs-lbl{color:rgba(0,200,255,.6);}
+.gsbadge.net .gs-lbl{color:rgba(255,170,0,.6);}
+.gs-val{font-family:var(--orb);font-size:11px;font-weight:900;line-height:1;}
+.gsbadge.spend .gs-val{color:#ff4466;}
+.gsbadge.earn .gs-val{color:var(--g);}
+.gsbadge.tvl .gs-val{color:#00eeff;}
+.gsbadge.net .gs-val{color:var(--a);}
+/* ミニチャート */
+#govChartWrap{padding:0 10px 8px;border-bottom:1px solid var(--brd);flex-shrink:0;}
+.gc-hdr{display:flex;align-items:center;justify-content:space-between;padding:5px 0 4px;}
+.gc-lbl{font-size:5px;color:var(--dim);letter-spacing:2px;font-family:var(--orb);}
+.gc-tabs{display:flex;gap:2px;}
+.gc-tab{font-family:var(--orb);font-size:5px;letter-spacing:1px;padding:2px 5px;
+  border:1px solid var(--brd);color:var(--dim);cursor:pointer;background:transparent;transition:.15s;}
+.gc-tab.on{border-color:var(--g);color:var(--g);background:rgba(0,255,136,.08);}
+.gc-tab:hover{border-color:rgba(0,255,136,.5);color:rgba(0,255,136,.7);}
+#govChart{display:block;width:100%;height:64px;}
+.gc-footer{display:flex;gap:8px;margin-top:3px;}
+.gc-leg{display:flex;align-items:center;gap:3px;font-size:5px;color:var(--dim);}
+.gc-leg-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
+/* アクティブ投票: 収支バッジ */
+.av-fin{display:flex;gap:4px;margin-bottom:5px;}
+.av-fin-badge{padding:2px 7px;font-family:var(--orb);font-size:10px;font-weight:900;letter-spacing:.5px;}
+.av-fin-badge.spend{background:var(--r);color:#fff;}
+.av-fin-badge.earn{background:var(--g);color:#000;}
+/* ACHIEVEMENT CARD — hotstuff style */
+.acard{background:rgba(0,255,136,.03);border:1px solid var(--brd);position:relative;overflow:hidden;cursor:pointer;}
+.acard.pass{border-color:rgba(0,255,136,.3);}
+.acard.fail{border-color:rgba(255,51,85,.2);background:rgba(255,51,85,.03);}
+.acard:hover{filter:brightness(1.12);}
+.acard-detail{display:none;}
+.acard.open .acard-detail{display:block;}
+.acard-header{padding:7px 10px;display:flex;align-items:center;gap:7px;}
+.acard-chevron{font-size:7px;color:var(--dim);margin-left:auto;transition:transform .2s;}
+.acard.open .acard-chevron{transform:rotate(180deg);color:var(--g);}
+.acard-scan{position:absolute;top:0;left:-100%;width:60%;height:100%;
+  background:linear-gradient(90deg,transparent,rgba(0,255,136,.04),transparent);
+  animation:acscan 4s linear infinite;}
+.acard.fail .acard-scan{background:linear-gradient(90deg,transparent,rgba(255,51,85,.03),transparent);}
+@keyframes acscan{from{left:-60%}to{left:110%}}
+.acard-top{padding:7px 8px 5px;border-bottom:1px solid var(--brd);}
+.acard-badge{display:flex;align-items:center;gap:5px;margin-bottom:4px;}
+.acard-ico{font-size:16px;}.acard-result{font-family:var(--orb);font-size:6px;letter-spacing:2px;}
+.acard.pass .acard-result{color:var(--g);}.acard.fail .acard-result{color:var(--r);}
+.acard-nm{font-family:var(--orb);font-size:11px;color:#fff;margin-bottom:3px;font-weight:700;}
+.acard-dsc{font-size:7px;color:rgba(0,255,136,.6);line-height:1.5;}
+.acard-body{padding:6px 8px;}
+.acard-stats{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:6px;}
+.astat{text-align:center;padding:6px 4px;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.04);}
+.astat-val{font-family:var(--orb);font-size:13px;font-weight:700;display:block;}
+.astat-lbl{font-size:6px;color:var(--dim);letter-spacing:1px;display:block;margin-top:2px;}
+.acard.pass .astat-val{color:var(--g);}.acard.fail .astat-val{color:var(--r);}
+.acard-contrib{margin-top:6px;padding:6px 8px;background:rgba(0,0,0,.3);border:1px solid rgba(0,255,136,.05);}
+.acard-contrib-lbl{font-size:6px;color:var(--dim);letter-spacing:2px;margin-bottom:4px;font-family:var(--orb);}
+.acard-contrib-bar{height:6px;background:rgba(255,255,255,.05);border-radius:1px;}
+.acard-contrib-fill{height:100%;transition:width 1s ease;}
+.acard.pass .acard-contrib-fill{background:linear-gradient(90deg,var(--g2),var(--c));}
+.acard.fail .acard-contrib-fill{background:linear-gradient(90deg,var(--r),rgba(255,51,85,.4));}
+.acard-contrib-pct{font-family:var(--orb);font-size:16px;font-weight:900;margin-top:3px;letter-spacing:-1px;}
+.acard.pass .acard-contrib-pct{color:var(--g);}.acard.fail .acard-contrib-pct{color:var(--r);}
+.acard-time{font-size:6px;color:var(--dim);padding:3px 8px 5px;border-top:1px solid var(--brd);text-align:right;letter-spacing:1px;}
+/* SPAWN BURST animation */
+@keyframes spawnBurst{0%{opacity:0;transform:scale(0)}40%{opacity:1;transform:scale(1.4)}100%{opacity:1;transform:scale(1)}}
+.spawn-burst{animation:spawnBurst .5s cubic-bezier(.34,1.56,.64,1);}
+/* ECONOMY MODAL */
+#ecoModal{position:fixed;inset:0;z-index:800;background:rgba(0,0,0,.84);display:none;
+  align-items:center;justify-content:center;backdrop-filter:blur(6px);}
+#ecoModal.on{display:flex;}
+.embox{width:min(560px,94vw);background:rgba(2,8,14,.99);border:1px solid var(--brd2);position:relative;}
+.embc{position:absolute;width:12px;height:12px;border-style:solid;border-color:var(--g);}
+.embc.tl{top:-1px;left:-1px;border-width:2px 0 0 2px;}.embc.tr{top:-1px;right:-1px;border-width:2px 2px 0 0;}
+.embc.bl{bottom:-1px;left:-1px;border-width:0 0 2px 2px;}.embc.br{bottom:-1px;right:-1px;border-width:0 2px 2px 0;}
+.emhdr{padding:10px 14px;border-bottom:1px solid var(--brd);background:rgba(0,255,136,.02);
+  display:flex;justify-content:space-between;align-items:center;}
+.emtit{font-family:var(--orb);font-size:10px;letter-spacing:3px;color:var(--g);}
+.emcls{background:transparent;border:1px solid var(--brd);color:var(--dim);font-family:var(--orb);
+  font-size:7px;letter-spacing:2px;padding:3px 8px;cursor:pointer;}
+.emcls:hover{border-color:var(--g);color:var(--g);}
+.embody{padding:14px 16px;display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.emcard{background:rgba(0,0,0,.3);border:1px solid var(--brd);padding:10px 12px;position:relative;overflow:hidden;}
+.emcard::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.emcard.tvl::before{background:linear-gradient(90deg,#00aaff,#00ffee);}
+.emcard.trs::before{background:linear-gradient(90deg,#00ff88,#00cc66);}
+.emcard.rev::before{background:linear-gradient(90deg,#ffaa00,#ff8800);}
+.emcard.dec::before{background:linear-gradient(90deg,#f43f5e,#ffaa00,#00ff88);}
+.emcard.nak::before{background:linear-gradient(90deg,#e879f9,#a855f7);}
+.emcard.gin::before{background:linear-gradient(90deg,#f43f5e,#ffaa00);}
+.emcard.fac::before{background:linear-gradient(90deg,#00ffee,#00aaff);}
+.emcard.drp::before{background:linear-gradient(90deg,#4ade80,#22d3ee);}
+.em-lbl{font-size:6px;color:var(--dim);letter-spacing:2px;margin-bottom:4px;font-family:var(--orb);}
+.em-val{font-family:var(--orb);font-size:22px;font-weight:900;margin-bottom:3px;line-height:1;}
+.emcard.tvl .em-val{color:#00ffee;}.emcard.trs .em-val{color:var(--g);}
+.emcard.rev .em-val{color:var(--a);}.emcard.dec .em-val{color:var(--c);}
+.emcard.nak .em-val{color:#e879f9;}.emcard.gin .em-val{color:var(--a);}
+.emcard.fac .em-val{color:#00ffee;}.emcard.drp .em-val{color:#4ade80;}
+.em-bar{height:4px;background:rgba(255,255,255,.06);margin-top:5px;}
+.em-fill{height:100%;transition:width .8s ease;}
+.emcard.tvl .em-fill{background:linear-gradient(90deg,#00aaff,#00ffee);}
+.emcard.trs .em-fill{background:linear-gradient(90deg,#00ff88,#00cc66);}
+.emcard.rev .em-fill{background:linear-gradient(90deg,#ffaa00,#ff8800);}
+.emcard.dec .em-fill{background:linear-gradient(90deg,#f43f5e,#ffaa00,#00ff88);}
+.emcard.nak .em-fill{background:linear-gradient(90deg,#e879f9,#a855f7);}
+.emcard.gin .em-fill{background:linear-gradient(90deg,#f43f5e,#ffaa00);}
+.emcard.fac .em-fill{background:linear-gradient(90deg,#00ffee,#00aaff);}
+.emcard.drp .em-fill{background:linear-gradient(90deg,#4ade80,#22d3ee);}
+.em-sub{font-size:7px;color:var(--dim);margin-top:3px;line-height:1.4;}
+.em-trend{font-size:7px;font-family:var(--orb);margin-top:2px;}
+.em-trend.up{color:var(--g);}.em-trend.dn{color:var(--r);}
+
+/* LEVEL UP */
+.lvmod{position:fixed;inset:0;z-index:700;background:rgba(0,0,0,.82);display:none;align-items:center;justify-content:center;backdrop-filter:blur(6px);}
+.lvmod.on{display:flex;}
+.lvbox{text-align:center;animation:lvp .4s cubic-bezier(.34,1.56,.64,1);}
+@keyframes lvp{from{opacity:0;transform:scale(.4)}to{opacity:1;transform:scale(1)}}
+.lvtit{font-family:var(--orb);font-size:42px;font-weight:900;color:var(--g);text-shadow:0 0 36px rgba(0,255,136,.7);letter-spacing:4px;margin-bottom:7px;}
+.lvnm{font-size:13px;color:var(--a);letter-spacing:5px;margin-bottom:18px;font-family:var(--orb);}
+.lvbtn{padding:9px 28px;font-family:var(--orb);font-size:8px;letter-spacing:4px;background:var(--dim2);border:1px solid var(--g2);color:var(--g);cursor:pointer;}
+
+/* LIVE MODE */
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+.live-tag{display:inline-block;font-family:var(--orb);font-size:5.5px;letter-spacing:1px;
+  padding:1px 5px;background:rgba(0,200,255,.1);border:1px solid rgba(0,200,255,.4);
+  color:var(--c);margin-left:4px;vertical-align:middle;}
+.live-pulse{animation:apdot 1.2s infinite;}
+/* ECOSYSTEM SHIELD */
+.shield-weak-flash{animation:shieldflash .4s infinite;}
+@keyframes shieldflash{0%,100%{opacity:1}50%{opacity:.2}}
+/* TOAST */
+.toast{position:fixed;top:40px;left:50%;transform:translateX(-50%);font-family:var(--orb);font-size:8px;letter-spacing:2px;padding:6px 16px;z-index:9500;display:none;pointer-events:none;white-space:nowrap;}
+.toast.ok{background:rgba(0,255,136,.08);border:1px solid var(--g2);color:var(--g);}
+.toast.warn{background:rgba(255,51,85,.09);border:1px solid var(--r);color:var(--r);}
+.toast.amber{background:rgba(255,170,0,.09);border:1px solid var(--a);color:var(--a);}
+.toast.on{display:block;animation:tin .2s ease;}
+@keyframes tin{from{opacity:0;transform:translateX(-50%) translateY(-5px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+</style>
+</head>
+<body>
+
+<!-- BOOT SCREEN -->
+<div class="scr on" id="bootScr">
+  <div class="bw" style="max-width:620px;">
+    <div class="bc tl"></div><div class="bc tr"></div><div class="bc bl"></div><div class="bc br"></div>
+    <div class="bsc"></div>
+    <div class="bsys">SYS// CARDANO GOVERNANCE COMMAND BRIDGE — ONLINE</div>
+    <div class="blogo">CARDANO<br>GALAXY QUEST</div>
+    <div class="bsub">委任せよ。銀河を守れ。</div>
+    <div class="bdv"></div>
+
+    <!-- コマンダー名入力 -->
+    <div class="blbl">// COMMANDER DESIGNATION //</div>
+    <div style="display:flex;gap:8px;margin-bottom:20px;align-items:center;">
+      <input id="cmdName" type="text" placeholder="YOUR NAME" maxlength="12"
+        style="flex:1;background:rgba(0,255,136,.04);border:1px solid var(--brd2);
+        color:var(--g);font-family:var(--orb);font-size:14px;font-weight:700;
+        letter-spacing:3px;padding:10px 14px;outline:none;"
+        oninput="checkBoot()" onkeydown="if(event.key==='Enter')document.getElementById('bootBtn').click()">
+      <div style="font-size:20px;color:var(--g)" id="cmd_emoji">👤</div>
+    </div>
+
+    <!-- 参謀選択 -->
+    <div class="blbl">// SELECT ADVISOR //</div>
+    <div class="chars" style="margin-bottom:16px">
+      <button class="cbtn" onclick="selAdvisor('byron',this)">
+        <span class="cico">🏛️</span><div class="ccls">ADVISOR-01</div>
+        <div class="cnm">BYRON</div>
+        <div style="font-size:7px;color:var(--c);letter-spacing:1px;margin-bottom:3px">創世期の参謀</div>
+        <div class="cdsc">歴史データを元に警告。衰退DRepを素早く検知する</div>
+      </button>
+      <button class="cbtn" onclick="selAdvisor('sheyla',this)">
+        <span class="cico">📊</span><div class="ccls">ADVISOR-02</div>
+        <div class="cnm">SHEYLA</div>
+        <div style="font-size:7px;color:var(--c);letter-spacing:1px;margin-bottom:3px">分散化の設計者</div>
+        <div class="cdsc">GINI・Nakamoto係数を監視。円環の歪みを即座に指摘</div>
+      </button>
+      <button class="cbtn" onclick="selAdvisor('vasil',this)">
+        <span class="cico">⚡</span><div class="ccls">ADVISOR-03</div>
+        <div class="cnm">VASIL</div>
+        <div style="font-size:7px;color:var(--c);letter-spacing:1px;margin-bottom:3px">最適化の専門家</div>
+        <div class="cdsc">予算効率と投票可決率を計算。戦略的配置を提案する</div>
+      </button>
+    </div>
+
+    <!-- ホルダークラス選択 -->
+    <div class="blbl">// HOLDER CLASS //</div>
+    <div class="chars" style="margin-bottom:20px">
+      <button class="cbtn" onclick="selChar('shrimp',this)">
+        <span class="cico">🦐</span><div class="ccls">CLASS-01</div>
+        <div class="cnm">SHRIMP</div>
+        <div class="cdsc">少額でも高XP。分散委任で銀河貢献</div>
+      </button>
+      <button class="cbtn" onclick="selChar('dolphin',this)">
+        <span class="cico">🐬</span><div class="ccls">CLASS-02</div>
+        <div class="cnm">DOLPHIN</div>
+        <div class="cdsc">標準型。影響力と分散のバランス最適</div>
+      </button>
+      <button class="cbtn" onclick="selChar('whale',this)">
+        <span class="cico">🐳</span><div class="ccls">CLASS-03</div>
+        <div class="cnm">WHALE</div>
+        <div class="cdsc">最大影響力。集中委任で分散が崩壊する</div>
+      </button>
+    </div>
+
+    <button class="blaunch" id="bootBtn" onclick="launch()" disabled>▶ ENGAGE COMMAND BRIDGE</button>
+  </div>
+</div>
+
+<!-- GAME SCREEN -->
+<div class="scr" id="game">
+  <div id="mainArea">
+    <canvas id="starC"></canvas>
+    <canvas id="mainC"></canvas>
+  <!-- ADVISOR PANEL (LEFT) -->
+  <div id="advisorPanel">
+    <div class="ap-hdr">
+      <div class="ap-title">// ADVISOR TERMINAL</div>
+      <div class="ap-sub">量子AI統合情報端末</div>
+    </div>
+    <!-- タブ -->
+    <div class="ap-tabs">
+      <div class="aptab on" id="apt_byron"   onclick="switchAdvisorTab('byron')">BYRON</div>
+      <div class="aptab"    id="apt_sheyla"  onclick="switchAdvisorTab('sheyla')">SHEYLA</div>
+      <div class="aptab"    id="apt_vasil"   onclick="switchAdvisorTab('vasil')">VASIL</div>
+      <div class="aptab"    id="apt_uroboros" onclick="switchAdvisorTab('uroboros')" style="color:rgba(232,121,249,.6)">UROBO</div>
+    </div>
+    <!-- アドバイザーカード -->
+    <div class="ap-advisor" id="ap_card">
+      <div class="ap-avatar" id="ap_avatar">🏛️</div>
+      <div>
+        <div class="ap-name" id="ap_name">BYRON</div>
+        <div class="ap-role" id="ap_role">// 創世期の参謀 · 歴史分析</div>
+        <div class="ap-status"><div class="ap-dot"></div><span id="ap_status_lbl">ANALYZING...</span></div>
+      </div>
+    </div>
+    <!-- セリフログ -->
+    <div class="ap-log" id="advisorLog">
+      <div class="ap-empty">銀河を観察中...<br><span style="color:rgba(0,255,136,.3)">委任を開始すると<br>情報が流れ始める</span></div>
+    </div>
+    <!-- フェーズ表示 -->
+    <div class="ap-phase" id="ap_phase">
+      <div class="ap-phase-lbl">現在フェーズ</div>
+      <div class="ap-phase-tag" id="ap_phase_tag">⬡ PHASE-A : OUROBOROS</div>
+      <div class="ap-phase-desc" id="ap_phase_desc">円環維持モード — 量子AI監視中</div>
+    </div>
+  </div>
+
+  <!-- アドバイザーパネル開閉ボタン -->
+  <div id="apToggle" onclick="toggleAdvisorPanel()">
+    <span id="apToggle-lbl">ADVISOR</span>
+  </div>
+  <!-- NAKAMOTOアラートバナー -->
+  <div id="nakAlert">
+    <span class="na-ico">⚠️</span>
+    <span class="na-txt">NAKAMOTO ALERT</span>
+    <span class="na-val" id="nak_alert_val">係数: 3</span>
+    <span style="font-family:var(--orb);font-size:7px;color:rgba(255,255,255,.7)" id="nak_alert_msg">防衛線が脆弱です。分散化を急げ！</span>
+    <button class="na-dismiss" onclick="dismissNakAlert()">DISMISS ✕</button>
+  </div>
+    <div id="topHud">
+      <div class="hs"><div class="hid">CGQ</div></div>
+      <div class="hs"><span class="hlbl">COMMANDER</span><span class="hval a" id="h_char">—</span></div>
+      <div class="hs" id="hs_phase" style="display:none"><span class="hlbl">PHASE</span><span class="hval" id="h_phase" style="color:var(--c);font-size:7px">OUROBOROS</span></div>
+      <div class="hs"><span class="hlbl">VIEWING</span><span class="hval g" id="h_chain">CARDANO</span></div>
+      <div class="hs"><span class="hlbl">DEC.SCORE</span><span class="hval c" id="h_dec">0</span></div>
+      <div class="hs"><span class="hlbl">NAKAMOTO</span><span class="hval g" id="h_nak">—</span></div>
+      <div class="hs"><span class="hlbl">GINI</span><span class="hval a" id="h_gin">—</span></div>
+      <div class="hs"><span class="hlbl">RANK</span><span class="hval g" id="h_rnk">RECRUIT</span></div>
+      <div class="hs" style="flex:1;gap:5px;">
+        <div class="xpw">
+          <div style="display:flex;justify-content:space-between;">
+            <span class="hlbl" id="xp_lv">LV.1</span><span class="hlbl" id="xp_dt">0/100XP</span>
+          </div>
+          <div class="xpt"><div class="xpf" id="xp_bar" style="width:0%"></div></div>
+        </div>
+      </div>
+      <div class="hs" style="gap:4px;">
+        <button id="modeBtn" onclick="toggleLiveMode()"
+          style="font-family:var(--orb);font-size:7px;letter-spacing:2px;padding:4px 9px;
+          background:rgba(0,255,136,.06);border:1px solid var(--brd2);color:var(--dim);
+          cursor:pointer;transition:.2s;" title="DEMO/LIVEモード切り替え">
+          📡 DEMO
+        </button>
+        <button class="exitb" onclick="goBoot()">EXIT</button>
+      </div>
+    </div>
+    <!-- LIVE接続バナー -->
+    <div id="liveBanner" style="display:none;position:absolute;top:32px;left:0;right:0;z-index:299;
+      background:linear-gradient(90deg,rgba(0,10,20,.97),rgba(0,20,40,.97));
+      border-bottom:1px solid rgba(0,200,255,.3);padding:4px 14px;
+      align-items:center;gap:10px;font-family:var(--orb);">
+      <div style="width:6px;height:6px;border-radius:50%;background:var(--c);animation:apdot 1s infinite;flex-shrink:0"></div>
+      <span style="font-size:7px;color:var(--c);letter-spacing:2px" id="liveBannerTxt">CONNECTING TO KOIOS...</span>
+      <span style="margin-left:auto;font-size:6px;color:var(--dim)" id="liveBannerSub">api.koios.rest</span>
+      <div id="liveSpinner" style="width:10px;height:10px;border:1.5px solid rgba(0,255,238,.2);
+        border-top-color:var(--c);border-radius:50%;animation:spin .8s linear infinite;flex-shrink:0"></div>
+    </div>
+    <div id="chainTabs"></div>
+    <div id="l1Radar">
+      <canvas id="radarC" width="148" height="148" style="border-radius:50%;border:1px solid var(--brd2);box-shadow:0 0 14px rgba(0,255,136,.1);display:block;"></canvas>
+      <div class="rlbl">L1 RADAR — CLICK</div>
+    </div>
+    <div id="zoomC">
+      <button class="zbtn" id="zp">+</button>
+      <button class="zbtn" id="zr" style="font-size:7px">RST</button>
+      <button class="zbtn" id="zm">−</button>
+    </div>
+    <div id="htip">
+      <div class="th"><span class="thnm" id="ht_nm">—</span><span class="thtp" id="ht_tp">—</span></div>
+      <div class="tb">
+        <div class="tr2"><span class="tl">VOTE POWER</span><span class="tv" style="color:var(--a)" id="ht_pw">—</span>
+          <span class="tl">VOTE RATE</span><span class="tv" id="ht_vr">—</span></div>
+        <div class="tr2"><span class="tl">DELEGATORS</span><span class="tv" style="color:var(--b)" id="ht_dl">—</span>
+          <span class="tl">AVG HOLD</span><span class="tv" style="color:var(--c)" id="ht_dy">—</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:6px;color:var(--dim);margin-bottom:2px;">
+          <span>🐋 WHALE</span><span id="ht_wp" style="font-family:var(--orb);font-weight:700">—</span></div>
+        <div class="twbar"><div class="twfill" id="ht_wb"></div></div>
+        <div class="twrn" id="ht_wn"></div>
+        <div class="tcmt" id="ht_cm"></div>
+      </div>
+      <div class="thint" id="ht_ht">クリックで委任ターゲット設定</div>
+    </div>
+  </div>
+  <div id="bp">
+    <!-- LEFT: Economy Bars -->
+    <div class="bsect">
+      <div class="bshdr am" style="cursor:pointer;user-select:none" onclick="openEcoModal()" title="クリックで詳細">GALAXY ECONOMY <span style="color:var(--dim);font-size:6px">↗ EXPAND</span></div>
+      <div class="pbars">
+        <div class="pbrow"><div class="pblbl">TVL</div><div class="pbtrk"><div class="pbfill" id="pb_tvl" style="width:1%;background:linear-gradient(90deg,#00aaff,#00ffee)"></div></div><div class="pbval" id="pv_tvl">$890M</div></div>
+        <div class="pbrow"><div class="pblbl">TREASURY</div><div class="pbtrk"><div class="pbfill" id="pb_trs" style="width:55%;background:linear-gradient(90deg,#00ff88,#00cc66)"></div></div><div class="pbval" id="pv_trs">₳1.24B</div></div>
+        <div class="pbrow"><div class="pblbl">CHAIN REV</div><div class="pbtrk"><div class="pbfill" id="pb_rev" style="width:1%;background:linear-gradient(90deg,#ffaa00,#ff8800)"></div></div><div class="pbval" id="pv_rev">₳12K</div></div>
+        <div class="pbrow"><div class="pblbl">DEC.SCORE</div><div class="pbtrk"><div class="pbfill" id="pb_dec" style="width:0%;background:linear-gradient(90deg,#f43f5e,#ffaa00,#00ff88)"></div></div><div class="pbval" id="pv_dec">0</div></div>
+        <div class="pbrow"><div class="pblbl">NAKAMOTO</div><div class="pbtrk"><div class="pbfill" id="pb_nak" style="width:10%;background:linear-gradient(90deg,#e879f9,#a855f7)"></div></div><div class="pbval" id="pv_nak">—</div></div>
+        <div class="pbrow"><div class="pblbl">GINI INV.</div><div class="pbtrk"><div class="pbfill" id="pb_gin" style="width:53%;background:linear-gradient(90deg,#f43f5e,#ffaa00)"></div></div><div class="pbval" id="pv_gin">—</div></div>
+        <div class="pbrow"><div class="pblbl">FACILITIES</div><div class="pbtrk"><div class="pbfill" id="pb_fac" style="width:0%;background:linear-gradient(90deg,#00ffee,#00aaff)"></div></div><div class="pbval" id="pv_fac">0棟</div></div>
+      </div>
+    </div>
+    <!-- CENTER: Command Console -->
+    <div class="bsect">
+      <div class="bshdr">COMMAND CONSOLE</div>
+      <div class="dmode">
+        <button class="dmbtn on dep" id="btn_dep" onclick="setMode('dep')">▲ DEPLOY</button>
+        <button class="dmbtn rec" id="btn_rec" onclick="setMode('rec')">▼ RECALL</button>
+      </div>
+      <div class="dselrow">
+        <select class="dsel" id="dc_sel" onchange="selChange()"></select>
+        <input class="damt" id="dc_amt" type="number" placeholder="ADA" min="1">
+      </div>
+      <div class="dhint" id="dc_hint">委任中: <span id="dc_dep">0</span> ADA</div>
+      <input type="range" class="dslider" id="dc_sld" min="0" max="10000000" value="0" oninput="sldChange()">
+      <div class="dpcts">
+        <div class="dpct" onclick="setPct(25)">25%</div>
+        <div class="dpct" onclick="setPct(50)">50%</div>
+        <div class="dpct" onclick="setPct(75)">75%</div>
+        <div class="dpct" onclick="setPct(100)">MAX</div>
+      </div>
+      <button class="dexec dep" id="dc_exec" onclick="execCmd()">▲ DEPLOY DELEGATION</button>
+      <div class="rdmsg" id="rdmsg">⚠️ READ-ONLY — Cardanoのみ委任可能</div>
+    </div>
+    <!-- RIGHT: Status -->
+    <div class="bsect">
+      <div class="bshdr cy">MISSION STATUS</div>
+      <div class="slist" id="statusList"></div>
+      <div style="font-size:6px;color:var(--dim);letter-spacing:2px;margin:4px 0 2px;font-family:var(--orb);flex-shrink:0">// ACTIVE DEPLOYMENTS</div>
+      <div class="dchips" id="delChips"></div>
+      <!-- Bridge Controls -->
+      <div style="margin-top:5px;border-top:1px solid var(--brd);padding-top:5px;flex-shrink:0">
+        <div style="font-size:6px;color:var(--dim);letter-spacing:2px;margin-bottom:4px;font-family:var(--orb)">// BRIDGE GATES</div>
+        <div style="display:flex;gap:4px">
+          <button onclick="S.shield.bridges[0].flowDir=1;toggleBridge('eth')" id="btn_eth"
+            style="flex:1;padding:4px 2px;font-family:var(--orb);font-size:6px;letter-spacing:1px;
+            background:rgba(99,102,241,.08);border:1px solid rgba(99,102,241,.4);
+            color:rgba(99,102,241,.9);cursor:pointer">⬡ ETH IN</button>
+          <button onclick="S.shield.bridges[0].flowDir=-1;toggleBridge('eth')"
+            style="flex:1;padding:4px 2px;font-family:var(--orb);font-size:6px;letter-spacing:1px;
+            background:rgba(255,51,85,.06);border:1px solid rgba(255,51,85,.3);
+            color:rgba(255,100,100,.9);cursor:pointer">⬡ ETH OUT</button>
+        </div>
+        <div style="display:flex;gap:4px;margin-top:3px">
+          <button onclick="S.shield.bridges[1].flowDir=1;toggleBridge('btc')" id="btn_btc"
+            style="flex:1;padding:4px 2px;font-family:var(--orb);font-size:6px;letter-spacing:1px;
+            background:rgba(234,179,8,.08);border:1px solid rgba(234,179,8,.4);
+            color:rgba(234,179,8,.9);cursor:pointer">₿ BTC IN</button>
+          <button onclick="S.shield.bridges[1].flowDir=-1;toggleBridge('btc')"
+            style="flex:1;padding:4px 2px;font-family:var(--orb);font-size:6px;letter-spacing:1px;
+            background:rgba(255,51,85,.06);border:1px solid rgba(255,51,85,.3);
+            color:rgba(255,100,100,.9);cursor:pointer">₿ BTC OUT</button>
+        </div>
+        <div style="font-size:6px;color:var(--dim);letter-spacing:1px;margin-top:4px;font-family:var(--orb)">// INVEST SHIELD (₳500K/sector)</div>
+        <div style="display:flex;flex-wrap:wrap;gap:2px;margin-top:3px">
+          <button onclick="investInSector('defi')" style="padding:2px 5px;font-family:var(--orb);font-size:5px;background:rgba(0,255,136,.06);border:1px solid var(--brd);color:var(--g);cursor:pointer">💧DeFi</button>
+          <button onclick="investInSector('perpdex')" style="padding:2px 5px;font-family:var(--orb);font-size:5px;background:rgba(0,255,136,.06);border:1px solid var(--brd);color:var(--g);cursor:pointer">📈Perp</button>
+          <button onclick="investInSector('nft')" style="padding:2px 5px;font-family:var(--orb);font-size:5px;background:rgba(0,255,136,.06);border:1px solid var(--brd);color:var(--g);cursor:pointer">🎨NFT</button>
+          <button onclick="investInSector('gaming')" style="padding:2px 5px;font-family:var(--orb);font-size:5px;background:rgba(0,255,136,.06);border:1px solid var(--brd);color:var(--g);cursor:pointer">🎮Game</button>
+          <button onclick="investInSector('rwa')" style="padding:2px 5px;font-family:var(--orb);font-size:5px;background:rgba(0,255,136,.06);border:1px solid var(--brd);color:var(--g);cursor:pointer">🏠RWA</button>
+          <button onclick="investInSector('infra')" style="padding:2px 5px;font-family:var(--orb);font-size:5px;background:rgba(0,255,136,.06);border:1px solid var(--brd);color:var(--g);cursor:pointer">⚙Infra</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- GOVERNANCE SIDE PANEL -->
+  <div id="govPanel">
+    <div class="gpbtn" onclick="toggleGovPanel()">GOV LOG</div>
+    <div class="gpbadge" id="gpbadge">!</div>
+    <div class="gphdr" style="display:flex;justify-content:space-between;align-items:center;">
+      <div>
+        <div class="gphtit">⚖ GOVERNANCE LOG</div>
+        <div class="gphsub" id="gp_sub">可決履歴 · スクロールで確認</div>
+      </div>
+      <button onclick="toggleGovPanel()" style="background:transparent;border:none;color:var(--dim);cursor:pointer;font-size:11px;padding:0;line-height:1;font-family:var(--orb);">✕</button>
+    </div>
+    <!-- 収支サマリー -->
+    <div id="govSummary">
+      <div class="gsrow">
+        <div class="gsbadge spend"><div class="gs-lbl">支出</div><div class="gs-val" id="gs_spend">₳0</div></div>
+        <div class="gsbadge earn"><div class="gs-lbl">チェーン収入</div><div class="gs-val" id="gs_earn">₳0</div></div>
+      </div>
+      <div class="gsrow">
+        <div class="gsbadge tvl"><div class="gs-lbl">TVL増加 (累計)</div><div class="gs-val" id="gs_tvl">$0</div></div>
+        <div class="gsbadge net"><div class="gs-lbl">純益</div><div class="gs-val" id="gs_net">₳0</div></div>
+      </div>
+    </div>
+    <!-- 収益チャート -->
+    <div id="govChartWrap">
+      <div class="gc-hdr">
+        <span class="gc-lbl">// REVENUE CHART</span>
+        <div class="gc-tabs">
+          <div class="gc-tab on" id="gct_all"  onclick="setGovChartMode('all')">ALL</div>
+          <div class="gc-tab" id="gct_tvl"  onclick="setGovChartMode('tvl')">TVL</div>
+          <div class="gc-tab" id="gct_earn" onclick="setGovChartMode('earn')">収入</div>
+          <div class="gc-tab" id="gct_spend" onclick="setGovChartMode('spend')">支出</div>
+          <div class="gc-tab" id="gct_net"  onclick="setGovChartMode('net')">NET</div>
+        </div>
+      </div>
+      <canvas id="govChart"></canvas>
+      <div class="gc-footer">
+        <div class="gc-leg"><div class="gc-leg-dot" style="background:#00eeff"></div>TVL</div>
+        <div class="gc-leg"><div class="gc-leg-dot" style="background:#00ff88"></div>収入</div>
+        <div class="gc-leg"><div class="gc-leg-dot" style="background:#ff4466"></div>支出</div>
+        <div class="gc-leg"><div class="gc-leg-dot" style="background:#ffaa00"></div>NET</div>
+      </div>
+    </div>
+    <!-- ACTIVE VOTE (inline in panel) -->
+    <div id="activeVote">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+        <div class="avlbl" style="animation:blk .7s infinite">🗳 ACTIVE VOTE</div>
+        <div class="av-fin">
+          <span class="av-fin-badge spend" id="avf_spend"></span>
+          <span class="av-fin-badge earn" id="avf_earn"></span>
+        </div>
+      </div>
+      <div class="avnm" id="av_nm">—</div>
+      <div class="avdsc" id="av_dsc">—</div>
+      <div style="font-family:var(--orb);font-size:8px;color:var(--a);margin-bottom:6px" id="av_bdg">—</div>
+      <div class="avbar"><div class="avfill" id="av_yes" style="width:0%"></div></div>
+      <div class="avstats">
+        <span style="color:var(--g)">YES <span id="av_yp">0</span>%</span>
+        <span style="color:var(--r)">NO <span id="av_np">100</span>%</span>
+      </div>
+    </div>
+    <!-- HISTORY CARDS -->
+    <div class="gphist" id="govHist"></div>
+  </div>
+  <!-- ECONOMY MODAL -->
+  <div id="ecoModal" onclick="if(event.target===this)closeEcoModal()">
+    <div class="embox">
+      <div class="embc tl"></div><div class="embc tr"></div>
+      <div class="embc bl"></div><div class="embc br"></div>
+      <div class="emhdr">
+        <div class="emtit">📊 GALAXY ECONOMY — DETAILED VIEW</div>
+        <button class="emcls" onclick="closeEcoModal()">✕ CLOSE</button>
+      </div>
+      <div class="embody" id="emBody"></div>
+    </div>
+  </div>
+  <!-- LEVEL MODAL -->
+  <div class="lvmod" id="lvlModal" onclick="closeLvl()">
+    <div class="lvbox">
+      <div class="lvtit">RANK UP!</div>
+      <div class="lvnm" id="lv_nm">—</div>
+      <button class="lvbtn">ACKNOWLEDGE ▶</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+'use strict';
+// ═══════════════════════════════════════════
+// STATIC DATA
+// ═══════════════════════════════════════════
+const CARDANO_BASE=[
+  // ── タイタン級 (大型・要注意) ──
+  {n:'Yoroi',         p:11.98,tp:'wallet',    vr:72,avgD:312,ina:0, del:14820,wp:68,em:'🔴',cmt:'最大勢力。ウォレットのデフォルト委任で膨張。クジラ68%で意思決定が偏りがち。Yoroiウォレット運営チーム。'},
+  {n:'EMURGO',        p:5.15, tp:'corp',      vr:68,avgD:278,ina:0, del:1850, wp:55,em:'🏢',cmt:'Cardano創業団体のDRep。Genesis ADAは使わないと明言。安定しているが企業クジラ存在。'},
+  {n:'Eternl',        p:4.29, tp:'wallet',    vr:70,avgD:287,ina:0, del:6320, wp:52,em:'🔵',cmt:'Eternlウォレット系DRep。ワンクリック委任で急拡大。クジラ52%でやや不安定。'},
+  {n:'Blockdaemon',   p:4.94, tp:'corp',      vr:55,avgD:301,ina:0, del:69,   wp:94,em:'🐋',cmt:'機関向けインフラ企業。69名のみで3クジラが94%支配。非民主的な惑星の典型例。'},
+  {n:'Intersect MBO', p:3.60, tp:'foundation',vr:82,avgD:450,ina:0, del:320,  wp:38,em:'🔗',cmt:'Cardanoのメンバーシップ組織。委員会・ワーキンググループを通じて生態系を支援。'},
+  // ── 財団・機関系 ──
+  {n:'Cardano Found.', p:8.20,tp:'foundation',vr:100,avgD:890,ina:0,del:1,    wp:40,em:'🏛️',cmt:'Cardano財団DRep。100%投票記録を維持。360M ADAをコミュニティDRepに委任済み。'},
+  {n:'Tempo.vote',    p:3.80, tp:'community', vr:95,avgD:340,ina:0, del:2800, wp:22,em:'⏱️',cmt:'財団委任先(Dev&Builder枠)。ガバナンスツール開発者。投票率95%でrationale完備。'},
+  {n:'Sidan Lab',     p:3.40, tp:'corp',      vr:92,avgD:310,ina:0, del:1200, wp:28,em:'🔬',cmt:'財団委任先。Cardanoスマートコントラクト開発に特化したビルダーDRep。'},
+  {n:'Mesh',          p:2.90, tp:'community', vr:90,avgD:285,ina:0, del:980,  wp:18,em:'🕸️',cmt:'財団委任先。Cardano開発ツールMesh.jsの開発チーム。クジラ率18%で健全。'},
+  {n:'Anastasia Labs', p:2.50,tp:'corp',      vr:93,avgD:295,ina:0, del:840,  wp:20,em:'🔐',cmt:'財団委任先(Ops枠)。Cardanoのセキュリティ監査・スマコン開発専門。技術力最高峰。'},
+  // ── 個人DRep (高品質・実名) ──
+  {n:'Cerkoryn',      p:2.46, tp:'individual',vr:95,avgD:248,ina:0, del:580,  wp:15,em:'💎',cmt:'財団委任先。2024年9月登録の最初期DRep。rationale率98.6%。デュアル学士の研究者肌。'},
+  {n:'Kyle Solomon',  p:2.20, tp:'individual',vr:93,avgD:230,ina:0, del:420,  wp:12,em:'⭐',cmt:'財団委任先。コミュニティ主権を重視する個人DRep。クジラ率12%で非常に健全。'},
+  {n:'C.Gianelloni',  p:2.10, tp:'individual',vr:91,avgD:215,ina:0, del:390,  wp:14,em:'✨',cmt:'財団委任先。CC選挙で個人DRep最多得票(44票)。Chris Gianelloniとも表記される。'},
+  {n:'Socious',       p:1.85, tp:'community', vr:88,avgD:198,ina:0, del:310,  wp:20,em:'🤝',cmt:'財団委任先。社会的インパクト重視のコミュニティDRep。途上国へのCardano普及に注力。'},
+  {n:'Cardano Curia', p:1.68, tp:'foundation',vr:90,avgD:180,ina:0, del:190,  wp:25,em:'⚖️',cmt:'CC新委員。1.68B ADA支持でCC選挙に勝利。憲法遵守を最優先事項とするDRep。'},
+  // ── DeFi・プロトコル系 ──
+  {n:'Liqwid DAO',    p:2.30, tp:'community', vr:88,avgD:260,ina:0, del:720,  wp:30,em:'💧',cmt:'CardanoのDeFiレンディングプロトコルLiqwid Finance共同創設者のDRep。TVL重視の判断基準。'},
+  {n:'Snek.fun',      p:1.62, tp:'community', vr:82,avgD:190,ina:0, del:4200, wp:18,em:'🐍',cmt:'コミュニティ文化・リテール参加を代表するDRep。SNEKミームコミュニティの声を届ける。'},
+  {n:'USDM/Moneta',   p:1.45, tp:'corp',      vr:85,avgD:220,ina:0, del:290,  wp:32,em:'💵',cmt:'規制準拠型ステーブルコインUSDMのMonetaチームDRep。TradFiとDeFiの橋渡し役。'},
+  // ── SPO・運営系 ──
+  {n:'BTBF/XS Pool',  p:1.72, tp:'spo',       vr:85,avgD:258,ina:0, del:280,  wp:22,em:'⚙️',cmt:'SPO出身DRep。ブロック生産とガバナンスを兼務。インフラ系提案に強い。'},
+  {n:'Everstake',     p:1.99, tp:'corp',       vr:61,avgD:290,ina:0, del:5899, wp:48,em:'🏗️',cmt:'マルチチェーン対応の大手ステーキング企業DRep。参加率61%はやや低め。規模は大きい。'},
+  {n:'Phil Lewis',    p:1.53, tp:'individual', vr:88,avgD:198,ina:0, del:210,  wp:15,em:'🌟',cmt:'DRepパイオニアワークショップ出身のリーダー。毎回丁寧なrationale付きで信頼が高い。'},
+  {n:'Adam Rusch',    p:1.20, tp:'individual', vr:86,avgD:175,ina:0, del:165,  wp:12,em:'🗳️',cmt:'DRepパイオニアプログラム出身。透明性の高い投票を継続。クジラ率12%の優良DRep。'},
+  {n:'Hosky',         p:0.95, tp:'community',  vr:80,avgD:155,ina:0, del:8900, wp:8, em:'🐴',cmt:'Cardanoコミュニティの人気者。HOSKY memeトークン発行者。クジラ率8%で分散度高い。'},
+  {n:'Pedro Lucas',   p:0.88, tp:'individual', vr:83,avgD:148,ina:0, del:138,  wp:10,em:'🌍',cmt:'南米代表のDRepパイオニアリーダー。途上国へのCardano普及活動の第一人者。'},
+  // ── 衰退・非活動 (警戒) ──
+  {n:'SleepingTitan', p:2.80, tp:'individual', vr:8, avgD:41, ina:95,del:312,  wp:72,em:'💀',cmt:'95日間投票なし。かつての英雄も今は眠れる巨人。委任の回収を強く推奨。'},
+  {n:'GhostNode',     p:1.40, tp:'corp',       vr:12,avgD:55, ina:82,del:198,  wp:85,em:'☠️',cmt:'82日間投票なし。クジラ85%支配で完全に機能不全。形骸化したDRep。'},
+];
+const CHAIN_DATA={
+  Ethereum:[
+    {n:'Lido',      p:32.4,tp:'protocol', vr:99,avgD:820,ina:0, del:280000,wp:88,em:'🏦',cmt:'ETH最大のリキッドステーキング。32%超を支配。'},
+    {n:'Coinbase',  p:14.1,tp:'corp',     vr:98,avgD:650,ina:0, del:95000, wp:95,em:'🏢',cmt:'取引所系バリデーター。極めて中央集権的。'},
+    {n:'Figment',   p:6.8, tp:'corp',     vr:97,avgD:580,ina:0, del:12000, wp:72,em:'⚙️',cmt:'機関投資家向け。高安定だが集中度も高い。'},
+    {n:'BinanceETH',p:5.2, tp:'corp',     vr:96,avgD:510,ina:0, del:45000, wp:91,em:'🔶',cmt:'クジラ91%支配の超集中惑星。'},
+    {n:'Kraken',    p:4.7, tp:'corp',     vr:95,avgD:490,ina:0, del:28000, wp:85,em:'🦑',cmt:'取引所系バリデーター。個人の声届きにくい。'},
+    {n:'RocketPool',p:2.8, tp:'protocol', vr:92,avgD:380,ina:0, del:42000, wp:25,em:'🚀',cmt:'分散型ステーキング。クジラ率25%でETH最良！'},
+    {n:'SoloStaker',p:0.9, tp:'individual',vr:82,avgD:250,ina:0,del:95000,  wp:5, em:'🏠',cmt:'自宅ステーカー。ETH分散化の砦。クジラ5%！'},
+    {n:'InactVal',  p:1.1, tp:'corp',     vr:15,avgD:90, ina:75,del:2200,  wp:78,em:'💀',cmt:'75日間ほぼ停止。ガバナンスに不参加。'},
+  ],
+  Solana:[
+    {n:'Jito',      p:18.2,tp:'protocol', vr:98,avgD:580,ina:0, del:85000, wp:82,em:'⚡',cmt:'SOL最大MEVプール。18%超支配。集中化深刻。'},
+    {n:'CoinbSOL',  p:11.4,tp:'corp',     vr:97,avgD:520,ina:0, del:62000, wp:90,em:'🏢',cmt:'取引所系。クジラ90%で完全に機関投資家の惑星。'},
+    {n:'Marinade',  p:8.6, tp:'protocol', vr:95,avgD:480,ina:0, del:95000, wp:35,em:'🌊',cmt:'分散型ステーキング。SOLで数少ない分散した惑星。'},
+    {n:'BinSOL',    p:7.8, tp:'corp',     vr:96,avgD:450,ina:0, del:55000, wp:88,em:'🔶',cmt:'Binanceバリデーター。クジラ率88%の超集中惑星。'},
+    {n:'FTX残骸',   p:5.2, tp:'corp',     vr:45,avgD:200,ina:60,del:18000, wp:96,em:'💀',cmt:'破綻した取引所の残骸。60日間停止状態。要撤退。'},
+    {n:'Laine',     p:2.4, tp:'individual',vr:88,avgD:320,ina:0, del:8500, wp:22,em:'💎',cmt:'個人バリデーター。SOLで数少ない低クジラ率！'},
+    {n:'SolBlaze',  p:1.2, tp:'protocol', vr:82,avgD:260,ina:0, del:28000, wp:28,em:'🔥',cmt:'分散型ステーキング。Marinadeに次ぐ分散惑星。'},
+  ],
+  BNB:[
+    {n:'BinVal',    p:28.5,tp:'corp',     vr:99,avgD:900,ina:0, del:320000,wp:98,em:'🔶',cmt:'Binance直営。28.5%単独支配。完全な中央集権。'},
+    {n:'Ankr',      p:12.2,tp:'corp',     vr:96,avgD:620,ina:0, del:45000, wp:85,em:'⚓',cmt:'BNB二番手。依然高集中。'},
+    {n:'Tranchess', p:8.9, tp:'protocol', vr:94,avgD:540,ina:0, del:28000, wp:78,em:'♟️',cmt:'DeFiプロトコル系。中央集権的だが利回り高い。'},
+    {n:'Nodereal',  p:4.8, tp:'corp',     vr:91,avgD:420,ina:0, del:15000, wp:70,em:'🖥️',cmt:'インフラプロバイダー。BNBの中では比較的分散。'},
+    {n:'LegendNode',p:1.4, tp:'individual',vr:80,avgD:260,ina:0,del:4200,  wp:32,em:'🌟',cmt:'BNBで数少ない個人バリデーター。分散化に貢献。'},
+  ],
+  Avalanche:[
+    {n:'AvaLabs',   p:12.8,tp:'foundation',vr:98,avgD:680,ina:0,del:18000, wp:75,em:'△',cmt:'AVAX財団直営。12.8%支配。比較的透明性高い。'},
+    {n:'CoinbAVAX', p:8.4, tp:'corp',     vr:97,avgD:580,ina:0, del:32000, wp:85,em:'🏢',cmt:'取引所系。クジラ85%支配の集中惑星。'},
+    {n:'GQComm',    p:6.2, tp:'community',vr:90,avgD:480,ina:0, del:8500,  wp:30,em:'🌐',cmt:'コミュニティ主導。クジラ率30%で優良な分散化！'},
+    {n:'Stakely',   p:1.9, tp:'corp',     vr:83,avgD:270,ina:0, del:4200,  wp:38,em:'🎯',cmt:'マルチチェーン対応。AVAXでは比較的分散。'},
+    {n:'SoloAVAX',  p:0.8, tp:'individual',vr:78,avgD:210,ina:0,del:6800,  wp:12,em:'🏔️',cmt:'個人バリデーター。AVAX生態系の分散化に貢献。'},
+  ],
+  Polkadot:[
+    {n:'W3F',       p:8.2, tp:'foundation',vr:96,avgD:720,ina:0,del:12000, wp:65,em:'🕸️',cmt:'Web3 Foundation直営。エコシステム発展に貢献。'},
+    {n:'Parity',    p:6.8, tp:'corp',     vr:98,avgD:650,ina:0, del:8500,  wp:72,em:'⚡',cmt:'Polkadot開発元。高技術力だが集中化リスクあり。'},
+    {n:'Stateless', p:2.8, tp:'individual',vr:88,avgD:380,ina:0,del:3800,  wp:25,em:'💚',cmt:'コミュニティ重視の個人バリデーター。優れた分散化！'},
+    {n:'Paranodes', p:1.8, tp:'individual',vr:82,avgD:280,ina:0,del:2800,  wp:18,em:'🌱',cmt:'クジラ率18%でDOT最良の分散化惑星！'},
+    {n:'InactColl', p:1.5, tp:'corp',     vr:20,avgD:80, ina:68,del:3200,  wp:80,em:'☠️',cmt:'68日間ほぼ停止中。パラチェーン機能に支障。'},
+  ],
+};
+const L1_BASE=[
+  {name:'Ethereum', ico:'⬡',score:9200,col:'#6366f1',growth:1.4},
+  {name:'Solana',   ico:'◎',score:8100,col:'#a855f7',growth:2.1},
+  {name:'BNB',      ico:'◈',score:6800,col:'#eab308',growth:1.2},
+  {name:'Cardano',  ico:'∞',score:4000,col:'#00ff88',growth:0,isMe:true},
+  {name:'Avalanche',ico:'△',score:3200,col:'#f43f5e',growth:1.0},
+  {name:'Polkadot', ico:'⬡',score:2800,col:'#e879f9',growth:0.7},
+];
+const L1_EVENTS=[
+  {chain:'Ethereum',msg:'⬡ ETH L2エコシステム拡大！TVL急増',boost:1.8},
+  {chain:'Solana',  msg:'◎ SOL ミームコイン爆発！ユーザー急増',boost:2.5},
+  {chain:'BNB',     msg:'◈ BNB 新規DeFi大量誘致！',boost:1.6},
+  {chain:'Avalanche',msg:'△ AVAX ゲームチェーン参入！',boost:1.5},
+];
+const PROPOSALS=[
+  {nm:'DeFi Protocol v3',   ico:'🏦',dsc:'高度な分散金融施設。利用者増加→収益UP',   bdg:2000000,xp:30,sc:50,tvl:5000000,
+   achv:{stat1lbl:'TVL増加',stat2lbl:'DEC+',contrib:'分散化貢献度',detail:'流動性プールが7つ展開。取引量増加でトレジャリー還流。'}},
+  {nm:'NFT Marketplace',    ico:'🎨',dsc:'クリエイター向け施設。新ユーザー誘致',     bdg:800000, xp:20,sc:35,tvl:2000000,
+   achv:{stat1lbl:'TVL増加',stat2lbl:'DEC+',contrib:'分散化貢献度',detail:'クリエイター1,200名が新規DRep委任。文化系惑星が活性化。'}},
+  {nm:'Gaming Hub',         ico:'🎮',dsc:'エンタメ施設。若いユーザーを銀河に引き込む',bdg:1200000,xp:25,sc:42,tvl:3000000,
+   achv:{stat1lbl:'TVL増加',stat2lbl:'DEC+',contrib:'分散化貢献度',detail:'ゲーマー世代が流入。新規委任者数が32%増加した。'}},
+  {nm:'Education Center',   ico:'🎓',dsc:'ガバナンス学習施設。委任参加率UP効果あり', bdg:500000, xp:15,sc:28,tvl:1200000,
+   achv:{stat1lbl:'TVL増加',stat2lbl:'DEC+',contrib:'分散化貢献度',detail:'ガバナンス参加率が18%向上。初心者委任者が急増。'}},
+  {nm:'Infrastructure Base',ico:'⚡',dsc:'基礎インフラ強化。全施設の品質が向上',     bdg:3000000,xp:40,sc:65,tvl:8000000,
+   achv:{stat1lbl:'TVL増加',stat2lbl:'DEC+',contrib:'分散化貢献度',detail:'全惑星のノード応答速度が42%向上。稼働率99.9%達成。'}},
+  {nm:'Global Liquidity Hub',ico:'🌐',dsc:'他銀河からのユーザー獲得施設！',          bdg:1800000,xp:35,sc:58,tvl:5000000,
+   achv:{stat1lbl:'TVL増加',stat2lbl:'DEC+',contrib:'分散化貢献度',detail:'外部チェーンから$12M流入。クロスチェーンブリッジ開設。'}},
+];
+const LEVELS=[
+  {min:0,   nm:'RECRUIT',          lbl:'NONE'},
+  {min:100, nm:'BRONZE COMMANDER', lbl:'🥉 BRONZE'},
+  {min:300, nm:'SILVER GUARDIAN',  lbl:'🥈 SILVER'},
+  {min:600, nm:'PLATINUM ADMIRAL', lbl:'🏅 PLAT.'},
+  {min:1000,nm:'DIAMOND FLEET CMD',lbl:'💎 DIAMOND'},
+  {min:2000,nm:'GALAXY MARSHAL',   lbl:'🌟 GALAXY'},
+];
+const NEW_DREP_POOL=[
+  {n:'Ha Nguyen',    em:'🌱',tp:'individual',wp:8, vr:85,cmt:'DRepパイオニアプログラムリーダー出身。ベトナムからCardanoのアジア普及を担う新星DRep。'},
+  {n:'Jenny Brito',  em:'🌎',tp:'individual',wp:10,vr:82,cmt:'パイオニアプログラム出身のラテンアメリカ代表。社会インパクト型ガバナンスを推進。'},
+  {n:'Surf Protocol',em:'🏄',tp:'community', wp:15,vr:78,cmt:'CardanoのDeFiレンディングプロトコルSurf創設者。UX改善とDeFi普及に特化した新DRep。'},
+  {n:'WADA Global',  em:'🌍',tp:'foundation',wp:12,vr:80,cmt:'アフリカ地域代表のDRepパイオニア組織。途上国へのCardano教育・普及の最前線。'},
+  {n:'Ubio Obu',     em:'🦅',tp:'individual',wp:8, vr:88,cmt:'ナイジェリア発のDRepパイオニアリーダー。アフリカコミュニティの声を銀河に届ける。'},
+  {n:'Jaromir Tesar',em:'🇨🇿',tp:'individual',wp:10,vr:84,cmt:'中欧代表のDRepパイオニアリーダー。ヨーロッパのCardanoコミュニティを代表する新星。'},
+  {n:'Pragma',       em:'⚡',tp:'corp',      wp:22,vr:86,cmt:'Cardano開発者コミュニティをサポートする組織。エコシステム成長に直結するプロジェクトを支援。'},
+  {n:'Martin M.',    em:'🌿',tp:'individual',wp:8, vr:83,cmt:'Martin Musagara。アフリカ系DRepパイオニアリーダー。地域コミュニティ形成に注力する新星。'},
+];
+const GINI_BASE={Cardano:.47,Ethereum:.82,Solana:.78,BNB:.91,Avalanche:.65,Polkadot:.58};
+const NAK_BASE= {Cardano:24, Ethereum:2,  Solana:3,  BNB:1,  Avalanche:5,  Polkadot:8};
+const CHAIN_COLS={Cardano:'0,255,136',Ethereum:'99,102,241',Solana:'168,85,247',BNB:'234,179,8',Avalanche:'244,63,94',Polkadot:'232,121,249'};
+const FAC_ICOS=['🏦','🎨','🎮','🎓','⚡','🌐','🏗️','🏛️'];
+const CHAR_EMO={shrimp:'🦐',dolphin:'🐬',whale:'🐳'};
+const CHAR_LBL={shrimp:'🦐 SHRIMP',dolphin:'🐬 DOLPHIN',whale:'🐳 WHALE'};
+
+// ═══════════════════════════════════════════
+// STATE — single object, no duplicates
+// ═══════════════════════════════════════════
+const S={
+  // current view
+  chain:'Cardano',
+  charType:'dolphin',
+  // LIVE/DEMO mode
+  liveMode:false,
+  liveData:{
+    dreps:[],
+    lastFetch:0,
+    loading:false,
+    error:null,
+    networkTotals:null,
+  },
+  // Cardano live state (only these are interactive)
+  cardano:{
+    dreps: CARDANO_BASE.map(d=>({...d})),
+    delegations:[],   // [{idx,ada}]
+    facilities:{},    // {idx:[{ico,an}]}
+    decScore:0,
+    xp:0,
+    lvl:0,
+    extraR:{},        // {idx:number}
+    spawned:0,
+  },
+  // Economy (global, driven by Cardano actions)
+  eco:{rev:12400,treasury:1240000000,tvl:890000000},
+  // Ecosystem Shield
+  shield:{
+    sectors:[
+      {id:'defi',    lbl:'DeFi',      emoji:'💧',health:0.72,angle:0},
+      {id:'dex',     lbl:'DEX/Swap',  emoji:'🔄',health:0.65,angle:0},
+      {id:'perpdex', lbl:'Perp DEX',  emoji:'📈',health:0.40,angle:0},
+      {id:'nft',     lbl:'NFT',       emoji:'🎨',health:0.38,angle:0},
+      {id:'gaming',  lbl:'Gaming',    emoji:'🎮',health:0.55,angle:0},
+      {id:'rwa',     lbl:'RWA',       emoji:'🏠',health:0.60,angle:0},
+      {id:'stable',  lbl:'Stablecoin',emoji:'💵',health:0.68,angle:0},
+      {id:'identity',lbl:'Identity',  emoji:'🪪',health:0.45,angle:0},
+      {id:'infra',   lbl:'Infra',     emoji:'⚙️',health:0.80,angle:0},
+    ],
+    bridges:[
+      {id:'eth',lbl:'ETH Bridge', emoji:'⬡',open:false,openFrac:0,flowDir:1, col:'99,102,241',angle:0,flowParticles:[]},
+      {id:'btc',lbl:'BTC Bridge', emoji:'₿',open:false,openFrac:0,flowDir:1, col:'234,179,8', angle:0,flowParticles:[]},
+    ],
+    investCooldown:0,
+  },
+  // L1 competition
+  l1:[...L1_BASE.map(d=>({...d}))],
+  l1cool:0,
+  // Game loop helpers
+  af:0,
+  voteActive:false,
+  hovIdx:-1,
+  selectedIdx:-1,
+  dpMode:'dep',
+  // Canvas
+  bubbles:[],
+  lasers:[],
+  flows:[],
+  beams:[],
+  // Player character drag
+  player:{x:0,y:0,vx:0,vy:0,dragging:false,targetIdx:-1},
+  // Governance
+  govOpen:false,
+  govHistory:[],  // [{prop,passed,yesP,tvlGain,decGain,treasury,time,decBefore}]
+  newVoteCount:0,
+};
+
+// ═══════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════
+function getDreps(){
+  if(S.liveMode && S.chain==='Cardano' && S.liveData && S.liveData.dreps.length>0){
+    return S.liveData.dreps;
+  }
+  if(S.chain==='Cardano')return S.cardano.dreps;
+  return CHAIN_DATA[S.chain]||S.cardano.dreps;
+}
+function calcM(dreps){
+  const ps=dreps.map(d=>d.p);
+  const tot=ps.reduce((a,b)=>a+b,0)||1;
+  const fr=[...ps.map(v=>v/tot)].sort((a,b)=>b-a);
+  let cum=0,nak=0;for(const f of fr){cum+=f;nak++;if(cum>=.33)break;}
+  let gs=0;const n=fr.length,avg=1/n;
+  for(let i=0;i<n;i++)for(let j=0;j<n;j++)gs+=Math.abs(fr[i]-fr[j]);
+  const gini=gs/(2*n*n*avg);
+  const isC=S.chain==='Cardano';
+  const dlcnt=isC?S.cardano.delegations.length:0;
+  return{
+    nak:Math.max(1,nak+(isC?Math.floor(dlcnt*.8):0)),
+    gini:Math.max(.05,Math.min(.99,gini-(isC?dlcnt*.015:0))),
+  };
+}
+function pcol(d){
+  if(d.ina>60)return'70,80,100';
+  if(d.wp>80)return'220,55,55';
+  if(d.wp>50)return'200,120,40';
+  if(d.p>8)return'190,90,60';
+  if(d.wp<20)return'0,210,130';
+  if(d.wp<35)return'0,160,220';
+  return'120,80,210';
+}
+function fmt(n){
+  if(n>=1e9)return(n/1e9).toFixed(2)+'B';
+  if(n>=1e6)return(n/1e6).toFixed(1)+'M';
+  if(n>=1e3)return(n/1e3).toFixed(0)+'K';
+  return Math.round(n).toString();
+}
+function fmtShort(n){
+  if(n>=1e9)return(n/1e9).toFixed(0)+'B';
+  if(n>=1e6)return(n/1e6).toFixed(0)+'M';
+  if(n>=1e3)return(n/1e3).toFixed(0)+'K';
+  return Math.round(n).toString();
+}
+
+// ═══════════════════════════════════════════
+// CANVAS
+// ═══════════════════════════════════════════
+const starC=document.getElementById('starC');
+const sx=starC.getContext('2d');
+const mainC=document.getElementById('mainC');
+const ctx=mainC.getContext('2d');
+const radarC=document.getElementById('radarC');
+const rdx=radarC.getContext('2d');
+let cW=0,cH=0,cx=0,cy=0;
+const vp={x:0,y:0,sc:1};
+
+function resize(){
+  const ma=document.getElementById('mainArea');
+  cW=ma.clientWidth;cH=ma.clientHeight;
+  if(cW<10||cH<10)return;
+  mainC.width=cW*devicePixelRatio;mainC.height=cH*devicePixelRatio;
+  mainC.style.width=cW+'px';mainC.style.height=cH+'px';
+  ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
+  starC.width=cW;starC.height=cH;
+  cx=cW/2;cy=cH/2;
+  buildBubbles();
+}
+window.addEventListener('resize',()=>setTimeout(resize,40));
+
+// ═══════════════════════════════════════════
+// STARS
+// ═══════════════════════════════════════════
+let stars=[];
+function initStars(){
+  stars=Array.from({length:320},()=>({
+    x:Math.random()*cW,y:Math.random()*cH,
+    r:Math.random()*1.3+.1,b:Math.random(),
+    sp:Math.random()*.2+.03,tw:Math.random()*Math.PI*2,
+    ts:Math.random()*.016+.004,dp:Math.random()
+  }));
+}
+function tickStars(){
+  sx.clearRect(0,0,cW,cH);
+  stars.forEach(s=>{
+    s.x-=s.sp*(s.dp+.1);s.tw+=s.ts;if(s.x<0)s.x=cW;
+    const a=(Math.sin(s.tw)*.4+.6)*s.b;
+    sx.beginPath();sx.arc(s.x,s.y,s.r,0,Math.PI*2);
+    sx.fillStyle=`rgba(${s.dp>.6?255:185},${s.dp>.6?255:215},255,${a})`;sx.fill();
+    if(s.r>1&&s.b>.7){sx.beginPath();sx.arc(s.x,s.y,s.r*3,0,Math.PI*2);sx.fillStyle=`rgba(200,220,255,${a*.05})`;sx.fill();}
+  });
+  [[.3,.45,'0,60,100'],[.68,.58,'40,0,80'],[.5,.72,'0,55,40']].forEach(([fx,fy,c])=>{
+    const g=sx.createRadialGradient(fx*cW,fy*cH,0,fx*cW,fy*cH,cW*.22);
+    g.addColorStop(0,`rgba(${c},.03)`);g.addColorStop(1,`rgba(${c},0)`);
+    sx.fillStyle=g;sx.fillRect(0,0,cW,cH);
+  });
+}
+
+// ═══════════════════════════════════════════
+// BUBBLES
+// ═══════════════════════════════════════════
+// Compute target position for bubble i given decProgress t (0=hierarchy, 1=circle)
+// t = global decProgress (0=hierarchy, 1=full ring)
+// delegated = whether this bubble has been delegated to
+// newBorn = true if recently spawned (starts at center)
+function bubbleTarget(i, total, d, t, delegated, newBorn){
+  // 多数のDRepを複数リングに分散配置
+  const innerPerRing = Math.ceil(total * 0.55);
+  const ringIdx = i < innerPerRing ? 0 : 1;
+  const ringTotal = ringIdx === 0 ? innerPerRing : total - innerPerRing;
+  const ringI = ringIdx === 0 ? i : i - innerPerRing;
+  const R_inner = Math.min(cW,cH)*.30;
+  const R_outer = Math.min(cW,cH)*.40;
+  const R = ringIdx === 0 ? R_inner : R_outer;
+  const ang = (ringI/Math.max(ringTotal,1))*Math.PI*2 - Math.PI/2 + ringIdx*Math.PI/ringTotal;
+
+  // UNDELEGATED NEW BUBBLE: orbit near center (radius 0→small)
+  // DELEGATED: moves toward outer ring as decScore rises
+  // OLD BUBBLE: uses legacy hierarchy→ring morph
+
+  // Outer democratic ring radius
+  const Rc = R * .92;
+
+  if(newBorn && !delegated){
+    // Freshly spawned, undelegated: stays near center, slowly drifts
+    const innerR = 35 + (i % 5)*18;
+    return {x: cx + Math.cos(ang)*innerR, y: cy + Math.sin(ang)*innerR};
+  }
+
+  if(delegated){
+    // Delegated bubble: lerp from center zone toward outer ring based on decProgress
+    const innerR = 60 + Math.random()*10;
+    const outerX = cx + Math.cos(ang)*Rc;
+    const outerY = cy + Math.sin(ang)*Rc;
+    const fromX = cx + Math.cos(ang)*innerR;
+    const fromY = cy + Math.sin(ang)*innerR;
+    const pull = Math.min(t + .25, 1); // delegated pulls faster to ring
+    const e = pull*pull*(3-2*pull);
+    return {x: fromX+(outerX-fromX)*e, y: fromY+(outerY-fromY)*e};
+  }
+
+  // Classic undelegated: hierarchical (big near center) → ring morph
+  const frH = .2 + .72*(1-Math.min(d.p/12,1));
+  const hx = cx+Math.cos(ang)*R*frH, hy = cy+Math.sin(ang)*R*frH;
+  const e = t*t*(3-2*t);
+  return {x: hx+(cx+Math.cos(ang)*Rc-hx)*e, y: hy+(cy+Math.sin(ang)*Rc-hy)*e};
+}
+
+function buildBubbles(){
+  const dr=getDreps();
+  const isC=S.chain==='Cardano';
+  const t=isC?Math.min(S.cardano.decScore/500,1):0;
+  const BASE_COUNT = CARDANO_BASE.length; // 最初からいる18体
+
+  S.bubbles=dr.map((d,i)=>{
+    const r=Math.max(Math.sqrt(d.p/12)*Math.min(cW,cH)*.085+10,9); // やや小さめに
+    const exRaw=isC?(S.cardano.extraR[i]||0):0;
+    const ex=Math.min(exRaw, r*1.2); // extraRの上限: 元サイズの2.2倍まで
+    const isDel=isC&&S.cardano.delegations.some(dl=>dl.idx===i);
+    const isNew=isC&&(i>=BASE_COUNT); // 後から参入したDRep
+    const tgt=bubbleTarget(i,dr.length,d,t,isDel,isNew&&!isDel);
+    const prev=S.bubbles[i];
+    // 新規バブルは中心スタート、既存は現在地を維持
+    const startX = isNew&&!prev ? cx + (Math.random()-.5)*20 : null;
+    const startY = isNew&&!prev ? cy + (Math.random()-.5)*20 : null;
+    const bx=prev?prev.x:(startX??tgt.x);
+    const by=prev?prev.y:(startY??tgt.y);
+    return{d,i,r,extraR:ex,
+      x:bx,y:by,tx:tgt.x,ty:tgt.y,
+      isNew,isDel,
+      col:pcol(d),wb:Math.random()*Math.PI*2,ph:Math.random()*Math.PI*2,pulse:1,
+      vx:0,vy:0};
+  });
+  // 重なり解消
+  for(let it=0;it<100;it++){
+    for(let a=0;a<S.bubbles.length-1;a++){
+      for(let b=a+1;b<S.bubbles.length;b++){
+        const pa=S.bubbles[a],pb=S.bubbles[b];
+        const ra=pa.r+pa.extraR,rb=pb.r+pb.extraR;
+        const dx=pb.x-pa.x,dy=pb.y-pa.y,dist=Math.sqrt(dx*dx+dy*dy)||.01;
+        const mn=ra+rb+5;
+        if(dist<mn){const p=(mn-dist)/2,nx=dx/dist,ny=dy/dist;
+          pa.x-=nx*p*.5;pa.y-=ny*p*.5;pb.x+=nx*p*.5;pb.y+=ny*p*.5;}
+      }
+    }
+  }
+}
+
+function drawBubble(b,hov){
+  const{x,y,d,col,ph}=b;
+  const isC=S.chain==='Cardano';
+  const decPb=isC?Math.min(S.cardano.decScore/500,1):0;
+  // At high decentralization, bubble sizes equalize (large shrink, small grow)
+  const baseR=b.r+b.extraR;
+  const avgR=Math.min(cW,cH)*.038; // target average radius at full dec
+  const eqR=baseR+(avgR-baseR)*decPb*.45;
+  const r=Math.max(eqR,9);
+  const pulse=Math.sin(S.af*.04+ph)*.5+.5;
+  const isDel=isC&&S.cardano.delegations.some(dl=>dl.idx===b.i);
+  ctx.save();
+  const isBCP=d.bcpStopped;
+  if(isBCP){
+    // BCP停止: 赤い強烈な警告リング + フラッシュ
+    const bcpPulse=Math.sin(S.af*.15)*.5+.5;
+    ctx.beginPath();ctx.arc(x,y,r+8+bcpPulse*6,0,Math.PI*2);
+    ctx.strokeStyle=`rgba(255,0,50,${.5+bcpPulse*.4})`;ctx.lineWidth=2.5;
+    ctx.setLineDash([4,3]);ctx.stroke();ctx.setLineDash([]);
+    // ✕マーク
+    const ms=r*.45;
+    ctx.strokeStyle=`rgba(255,50,50,${.7+bcpPulse*.3})`;ctx.lineWidth=2;
+    ctx.beginPath();ctx.moveTo(x-ms,y-ms);ctx.lineTo(x+ms,y+ms);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(x+ms,y-ms);ctx.lineTo(x-ms,y+ms);ctx.stroke();
+  } else if(d.ina>60){
+    ctx.beginPath();ctx.arc(x,y,r+5+pulse*4,0,Math.PI*2);
+    ctx.strokeStyle=`rgba(255,50,50,${.18+pulse*.1})`;ctx.lineWidth=1;
+    ctx.setLineDash([3,5]);ctx.stroke();ctx.setLineDash([]);
+  }
+  // 新規バブル・未委任: 中心待機を示す点滅リング + AWAITINGラベル
+  if(b.isNew&&!isDel){
+    ctx.beginPath();ctx.arc(x,y,r+4+pulse*3,0,Math.PI*2);
+    ctx.strokeStyle=`rgba(0,200,255,${.2+pulse*.18})`;
+    ctx.lineWidth=1;ctx.setLineDash([2,4]);ctx.stroke();ctx.setLineDash([]);
+    // 引力矢印: 中心方向に小さな矢
+    const toCenter=Math.atan2(cy-y,cx-x);
+    const ax=x+Math.cos(toCenter)*(r+11), ay=y+Math.sin(toCenter)*(r+11);
+    ctx.beginPath();ctx.moveTo(ax,ay);
+    ctx.lineTo(ax+Math.cos(toCenter)*6-Math.sin(toCenter)*3,ay+Math.sin(toCenter)*6+Math.cos(toCenter)*3);
+    ctx.lineTo(ax+Math.cos(toCenter)*6+Math.sin(toCenter)*3,ay+Math.sin(toCenter)*6-Math.cos(toCenter)*3);
+    ctx.closePath();ctx.fillStyle=`rgba(0,200,255,${.35+pulse*.2})`;ctx.fill();
+  }
+  const isSel=isC&&(S.selectedIdx===b.i);
+  if(isDel||hov||isSel){
+    const gc=isDel?'0,255,136':isSel?'255,220,0':'255,255,255';
+    const glR=isDel?2.5:isSel?2.2:1.9;
+    const gl=ctx.createRadialGradient(x,y,r*.3,x,y,r*glR);
+    gl.addColorStop(0,`rgba(${gc},${isDel?.16:isSel?.22:.09})`);gl.addColorStop(1,`rgba(${gc},0)`);
+    ctx.beginPath();ctx.arc(x,y,r*glR,0,Math.PI*2);ctx.fillStyle=gl;ctx.fill();
+  }
+  // 選択リング (黄色)
+  if(isSel&&!isDel){
+    const sp=Math.sin(S.af*.06)*.5+.5;
+    ctx.beginPath();ctx.arc(x,y,r+3+sp*3,0,Math.PI*2);
+    ctx.strokeStyle=`rgba(255,220,0,${.5+sp*.3})`;ctx.lineWidth=1.5;
+    ctx.setLineDash([4,3]);ctx.stroke();ctx.setLineDash([]);
+  }
+  if(b.pulse>1){ctx.translate(x,y);ctx.scale(b.pulse,b.pulse);ctx.translate(-x,-y);b.pulse=Math.max(1,b.pulse-.025);}
+  if(d.wp>50){
+    ctx.beginPath();ctx.ellipse(x,y,r*1.5,r*.34,Math.PI/10,0,Math.PI*2);
+    ctx.strokeStyle=`rgba(${col},.18)`;ctx.lineWidth=1.3;ctx.stroke();
+  }
+  // ── 3D 球体: 環境色 + 拡散光 + 鏡面反射 ──────────────────
+  // 1. 暗い底面グロー (環境光 ambient)
+  const ambG=ctx.createRadialGradient(x,y+r*.15,r*.1,x,y,r*1.05);
+  ambG.addColorStop(0,`rgba(${col},.06)`);
+  ambG.addColorStop(1,`rgba(${col},.0)`);
+  ctx.beginPath();ctx.arc(x,y,r*1.05,0,Math.PI*2);ctx.fillStyle=ambG;ctx.fill();
+
+  // 2. 主球体 (拡散光: 左上から照射)
+  const diffG=ctx.createRadialGradient(x-r*.32,y-r*.28,r*.04,x+r*.1,y+r*.1,r*1.1);
+  const alpha=hov?.72:.52;
+  diffG.addColorStop(0,   `rgba(${col},${alpha})`);
+  diffG.addColorStop(0.45,`rgba(${col},${alpha*.55})`);
+  diffG.addColorStop(0.75,`rgba(${col},${alpha*.22})`);
+  diffG.addColorStop(1,   `rgba(${col},.01)`);
+  ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fillStyle=diffG;ctx.fill();
+
+  // 3. 球体輪郭 (フレネル: エッジが明るくなる)
+  const edgeG=ctx.createRadialGradient(x,y,r*.6,x,y,r);
+  edgeG.addColorStop(0,'rgba(0,0,0,0)');
+  edgeG.addColorStop(0.7,'rgba(0,0,0,0)');
+  edgeG.addColorStop(1,`rgba(${col},.28)`);
+  ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fillStyle=edgeG;ctx.fill();
+
+  // 4. Vote rate アーク (健全度インジケーター)
+  if(r>11){
+    ctx.beginPath();ctx.arc(x,y,r+1.5,-Math.PI/2,-Math.PI/2+(d.vr/100)*Math.PI*2);
+    ctx.strokeStyle=d.ina>60?'rgba(255,55,55,.55)':d.wp>60?'rgba(255,130,40,.55)':'rgba(0,230,160,.55)';
+    ctx.lineWidth=2;ctx.stroke();
+  }
+
+  // 5. 委任オービットドット
+  if(isDel){
+    for(let o=0;o<4;o++){
+      const oa=S.af*.055+(o/4)*Math.PI*2;
+      const ox=x+Math.cos(oa)*(r+8), oy=y+Math.sin(oa)*(r+8);
+      ctx.beginPath();ctx.arc(ox,oy,1.8,0,Math.PI*2);
+      ctx.fillStyle=`rgba(0,255,136,${.55+pulse*.3})`;ctx.fill();
+      // 軌跡
+      ctx.beginPath();ctx.arc(x,y,r+8,-Math.PI/2+oa-0.5,-Math.PI/2+oa);
+      ctx.strokeStyle=`rgba(0,255,136,${.12+pulse*.06})`;ctx.lineWidth=1.5;ctx.stroke();
+    }
+  }
+
+  // 6. 一次ハイライト (左上 鋭い反射点)
+  const hl1=ctx.createRadialGradient(x-r*.34,y-r*.38,0,x-r*.34,y-r*.38,r*.32);
+  hl1.addColorStop(0,'rgba(255,255,255,.38)');
+  hl1.addColorStop(0.5,'rgba(255,255,255,.1)');
+  hl1.addColorStop(1,'rgba(255,255,255,0)');
+  ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fillStyle=hl1;ctx.fill();
+
+  // 7. 二次ハイライト (右下 環境反射)
+  const hl2=ctx.createRadialGradient(x+r*.42,y+r*.36,0,x+r*.42,y+r*.36,r*.22);
+  hl2.addColorStop(0,`rgba(${col},.22)`);
+  hl2.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fillStyle=hl2;ctx.fill();
+
+  // 8. 地面影 (惑星の落ち影)
+  const shadowScale=0.55+Math.sin(S.af*.028+b.ph)*.05;
+  ctx.beginPath();ctx.ellipse(x,y+r*.92,r*shadowScale,r*.14,0,0,Math.PI*2);
+  ctx.fillStyle=`rgba(0,0,0,.25)`;ctx.fill();
+  if(r>14){
+    ctx.fillStyle='rgba(0,255,136,.88)';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.font=`700 ${Math.min(r*.24,9)}px Share Tech Mono`;
+    ctx.fillText(d.n.length>9?d.n.slice(0,8)+'…':d.n,x,y-3);
+    ctx.fillStyle=`rgba(${col},1)`;ctx.font=`700 ${Math.min(r*.19,7)}px Orbitron`;
+    ctx.fillText(d.p.toFixed(1)+'%',x,y+5);
+  }else if(r>9){
+    const nfs=Math.min(r*.25,8);
+    ctx.font=`${nfs}px Share Tech Mono`;ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillStyle='rgba(0,0,0,.5)';ctx.fillText(d.n.slice(0,5),x+.8,y+.8);
+    ctx.fillStyle='rgba(0,255,136,.88)';ctx.fillText(d.n.slice(0,5),x,y);
+  }
+  if(r>10){
+    ctx.font=`${Math.min(r*.25,9)}px sans-serif`;
+    ctx.fillStyle='rgba(0,0,0,.4)';ctx.fillText(d.em||'',x+r*.53,y-r*.51);
+    ctx.fillStyle='rgba(255,255,255,.9)';ctx.fillText(d.em||'',x+r*.52,y-r*.52);
+  }
+  ctx.restore();
+}
+
+function drawFacs(b){
+  if(S.chain!=='Cardano')return;
+  const facs=S.cardano.facilities[b.i]||[];
+  facs.forEach((f,fi)=>{
+    const ang=(fi/Math.max(facs.length,1))*Math.PI*2-Math.PI/2;
+    const r=b.r+b.extraR;
+    const fx2=b.x+Math.cos(ang)*(r+17),fy2=b.y+Math.sin(ang)*(r+17);
+    f.an=Math.min((f.an||0)+.02,1);
+    ctx.save();ctx.translate(fx2,fy2);ctx.scale(f.an,f.an);
+    ctx.font='10px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(f.ico,0,0);ctx.restore();
+  });
+}
+
+// ═══════════════════════════════════════════
+// CENTER
+// ═══════════════════════════════════════════
+// ═══════════════════════════════════════════
+// ECOSYSTEM SHIELD
+// ═══════════════════════════════════════════
+function initShieldAngles(){
+  const sh=S.shield;
+  const total=sh.sectors.length+sh.bridges.length;
+  const allItems=[...sh.sectors,...sh.bridges];
+  allItems.forEach((item,i)=>{
+    item.angle=(i/total)*Math.PI*2-Math.PI/2;
+  });
+}
+
+function drawEcoShield(){
+  if(S.chain!=='Cardano')return;
+  const sh=S.shield;
+  const pulse=Math.sin(S.af*.03)*.5+.5;
+  const isC=S.chain==='Cardano';
+  const decP=isC?Math.min(S.cardano.decScore/500,1):0;
+
+  // シールド半径: DRep円環の外側
+  const ringR=Math.min(cW,cH)*.34*.92;
+  const shieldR=ringR+Math.min(cW,cH)*.12;
+  const gateR=shieldR+Math.min(cW,cH)*.07;
+
+  // ── セクターシールド弧 ──
+  const arcSpan=Math.PI*2/(sh.sectors.length+sh.bridges.length);
+  sh.sectors.forEach((sec,i)=>{
+    const ang=sec.angle;
+    const halfArc=arcSpan*.42;
+    const h=sec.health;
+    const cc=h>0.6?`0,255,${Math.floor(h*200)}`:
+              h>0.3?`${Math.floor(255*(1-h))},${Math.floor(200*h)},50`
+                   :`255,${Math.floor(50*h)},30`;
+
+    // シールド弧本体
+    const shAlpha=(h*.5+.05)*(.6+pulse*.15);
+    ctx.beginPath();
+    ctx.arc(cx,cy,shieldR,ang-halfArc,ang+halfArc);
+    ctx.strokeStyle=`rgba(${cc},${shAlpha})`;
+    ctx.lineWidth=Math.max(4,h*18);
+    ctx.stroke();
+
+    // 弱体化: 穴が開く (health<0.3)
+    if(h<0.3){
+      const crackAng=ang+(Math.sin(S.af*.05+i)*.3);
+      ctx.beginPath();ctx.arc(cx,cy,shieldR,crackAng-.04,crackAng+.04);
+      ctx.strokeStyle=`rgba(255,0,50,${.7+pulse*.3})`;
+      ctx.lineWidth=6;ctx.stroke();
+    }
+
+    // ラベル + 健全度バー
+    const lx=cx+Math.cos(ang)*(shieldR+22);
+    const ly=cy+Math.sin(ang)*(shieldR+22);
+    ctx.save();ctx.translate(lx,ly);
+
+    // アイコン
+    ctx.font=`${13/vp.sc}px serif`;
+    ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.globalAlpha=.6+h*.35;
+    ctx.fillText(sec.emoji,0,0);
+    ctx.globalAlpha=1;
+
+    // ラベル
+    ctx.font=`${5.5/vp.sc}px Share Tech Mono`;
+    ctx.fillStyle=`rgba(${cc},.8)`;
+    ctx.fillText(sec.lbl,0,11/vp.sc);
+
+    // 健全度バー
+    const bw=22/vp.sc,bh=3/vp.sc;
+    ctx.fillStyle=`rgba(255,255,255,.1)`;
+    ctx.fillRect(-bw/2,15/vp.sc,bw,bh);
+    ctx.fillStyle=`rgba(${cc},.8)`;
+    ctx.fillRect(-bw/2,15/vp.sc,bw*h,bh);
+    ctx.restore();
+  });
+
+  // ── Bridgeゲート ──
+  sh.bridges.forEach((br)=>{
+    const ang=br.angle;
+    const gx=cx+Math.cos(ang)*gateR;
+    const gy=cy+Math.sin(ang)*gateR;
+    const isOpen=br.openFrac>0.05;
+
+    // ゲート外枠
+    ctx.save();ctx.translate(gx,gy);ctx.rotate(ang+Math.PI/2);
+    const gw=20/vp.sc,gh=30/vp.sc;
+    const gAlpha=isOpen?(.6+pulse*.2):.3;
+    ctx.strokeStyle=`rgba(${br.col},${gAlpha})`;
+    ctx.lineWidth=1.5;
+    ctx.strokeRect(-gw/2,-gh/2,gw,gh);
+
+    // ゲートドア (左右に開く)
+    const doorOpen=br.openFrac*gw/2;
+    ctx.fillStyle=`rgba(${br.col},${isOpen?.12:.22})`;
+    // 左扉
+    ctx.fillRect(-gw/2,-gh/2,gw/2-doorOpen,gh);
+    // 右扉
+    ctx.fillRect(doorOpen,-gh/2,gw/2-doorOpen,gh);
+
+    // ゲートラベル
+    ctx.fillStyle=`rgba(${br.col},.9)`;
+    ctx.font=`bold ${9/vp.sc}px serif`;
+    ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(br.emoji,0,0);
+    ctx.font=`${5/vp.sc}px Share Tech Mono`;
+    ctx.fillStyle=`rgba(${br.col},.7)`;
+    ctx.fillText(br.lbl,0,12/vp.sc);
+    if(isOpen){
+      ctx.fillStyle=`rgba(${br.col},.9)`;
+      ctx.font=`bold ${5/vp.sc}px Share Tech Mono`;
+      ctx.fillText(br.flowDir>0?'▼ IN':'▲ OUT',0,-12/vp.sc);
+    }
+    ctx.restore();
+
+    // ゲート開閉アニメ
+    if(br.open&&br.openFrac<1)br.openFrac=Math.min(1,br.openFrac+.04);
+    else if(!br.open&&br.openFrac>0)br.openFrac=Math.max(0,br.openFrac-.04);
+
+    // フロー粒子
+    if(isOpen){
+      // 新粒子を追加
+      if(Math.random()<.15){
+        br.flowParticles.push({
+          t:0,ang:ang,dir:br.flowDir,
+          col:br.col,size:2+Math.random()*2
+        });
+      }
+      // 粒子更新・描画
+      br.flowParticles=br.flowParticles.filter(p=>{
+        p.t+=0.025;
+        if(p.t>1)return false;
+        // 流入: ゲートから円環へ、流出: 逆
+        const fromR=p.dir>0?gateR:shieldR*.8;
+        const toR=p.dir>0?shieldR*.8:gateR*1.3;
+        const pr=fromR+(toR-fromR)*p.t;
+        const px2=cx+Math.cos(p.ang)*pr+Math.sin(p.t*8)*(p.dir>0?3:-3);
+        const py2=cy+Math.sin(p.ang)*pr+Math.cos(p.t*8)*(p.dir>0?3:-3);
+        const palpha=(1-p.t)*(p.dir>0?.8:.5);
+        ctx.beginPath();ctx.arc(px2,py2,p.size/vp.sc,0,Math.PI*2);
+        const pcol=p.dir>0?p.col:'255,80,80';
+        ctx.fillStyle=`rgba(${pcol},${palpha})`;
+        ctx.fill();
+        return true;
+      });
+    }
+  });
+
+  // ── シールドクリックハンドラ用: ヒット検出のための角度保存 ──
+  S.shield._shieldR=shieldR;
+  S.shield._gateR=gateR;
+  S.shield._arcSpan=arcSpan;
+}
+
+// シールドへのトレジャリー投資
+function investInSector(secId){
+  if(S.eco.treasury<500000){toast('トレジャリー不足','warn');return;}
+  const sec=S.shield.sectors.find(s=>s.id===secId);
+  if(!sec)return;
+  if(S.shield.investCooldown>0){toast('投資クールダウン中','warn');return;}
+  S.eco.treasury-=500000;
+  sec.health=Math.min(1,sec.health+0.12);
+  S.shield.investCooldown=3;
+  addAdvisorLine('delegation_ok',{name:sec.lbl+' Sector'});
+  toast(`✅ ${sec.lbl}セクターを強化！健全度+12%`,'ok');
+  updateAll();
+}
+
+// Bridgeゲート開閉
+function toggleBridge(bridgeId){
+  const br=S.shield.bridges.find(b=>b.id===bridgeId);
+  if(!br)return;
+  br.open=!br.open;
+  if(br.open){
+    toast(`⬡ ${br.lbl} OPENED — ${br.flowDir>0?'流入中':'⚠ 流出注意！'}`, br.flowDir>0?'ok':'warn');
+    // 流入: セクターを少しずつ強化、流出: 他L1を成長
+    if(br.open){
+      br._flowInterval=setInterval(()=>{
+        if(!br.open){clearInterval(br._flowInterval);return;}
+        if(br.flowDir>0){
+          // 流入: ランダムセクターを強化
+          const tgt=S.shield.sectors[Math.floor(Math.random()*S.shield.sectors.length)];
+          tgt.health=Math.min(1,tgt.health+.015);
+          S.eco.tvl+=Math.floor(5000000*(Math.random()+.5));
+        } else {
+          // 流出: 他L1を成長させる
+          const rivals=S.l1.filter(l=>!l.isMe);
+          const r=rivals[Math.floor(Math.random()*rivals.length)];
+          if(r)r.score+=200;
+          // シールドも弱体化
+          const tgt=S.shield.sectors[Math.floor(Math.random()*S.shield.sectors.length)];
+          tgt.health=Math.max(0,tgt.health-.01);
+        }
+      },2000);
+    }
+  } else {
+    if(br._flowInterval)clearInterval(br._flowInterval);
+    toast(`${br.lbl} CLOSED`,'amber');
+  }
+}
+
+// シールド自然劣化 (geoTickから呼ぶ)
+function tickShield(){
+  if(S.chain!=='Cardano')return;
+  const sh=S.shield;
+  sh.sectors.forEach(sec=>{
+    // 自然劣化
+    sec.health=Math.max(0,sec.health-Math.random()*.008);
+    // 分散スコアが高いと回復が速い
+    const recovery=S.cardano.decScore>200?.004:.001;
+    sec.health=Math.min(1,sec.health+recovery);
+  });
+  // 投資クールダウン
+  if(sh.investCooldown>0)sh.investCooldown--;
+
+  // 弱いセクターがあれば参謀が警告
+  const weak=sh.sectors.filter(s=>s.health<0.3);
+  if(weak.length>0&&Math.random()<.3){
+    const w=weak[Math.floor(Math.random()*weak.length)];
+    const entry={
+      who:'VASIL',cls:'alert',
+      txt:`「⚠ <em>${w.lbl}セクター</em>の健全度が<em>${Math.floor(w.health*100)}%</em>に低下！防衛シールドに穴が開いています。トレジャリーで強化するか、他セクターで補完してください。」`,
+      time:Date.now(),tab:'vasil'
+    };
+    S.advisorState.logBuffer.unshift(entry);
+    if(S.advisorState.logBuffer.length>20)S.advisorState.logBuffer.pop();
+    if(S.advisorState.panelOpen)renderAdvisorLog();
+  }
+}
+
+function drawCenter(){
+  const pulse=Math.sin(S.af*.03)*.5+.5;
+  const cc=CHAIN_COLS[S.chain]||'0,255,136';
+  const isCardano=S.chain==='Cardano';
+
+  // LIVEモード: スキャンライン演出
+  if(S.liveMode && isCardano){
+    const scanY = ((S.af*1.8)%(cH)) - cH/2;
+    const scanGrad = ctx.createLinearGradient(cx-cW/2,cy+scanY,cx-cW/2,cy+scanY+4);
+    scanGrad.addColorStop(0,'transparent');
+    scanGrad.addColorStop(.5,`rgba(0,255,238,.06)`);
+    scanGrad.addColorStop(1,'transparent');
+    ctx.fillStyle=scanGrad;
+    ctx.fillRect(cx-cW/2,cy+scanY,cW,4);
+    // LIVEコーナーラベル
+    ctx.font=`bold ${8/vp.sc}px Share Tech Mono`;
+    ctx.fillStyle=`rgba(0,255,238,${.4+pulse*.2})`;
+    ctx.textAlign='left';
+    ctx.fillText('◉ LIVE — KOIOS MAINNET', (cx-cW/2*vp.sc)/vp.sc+10/vp.sc, (cy-cH/2*vp.sc)/vp.sc+48/vp.sc);
+    ctx.textAlign='center';
+  }
+  const m=calcM(getDreps());
+  const health=isCardano?Math.min(S.cardano.decScore/300,1):(1-(GINI_BASE[S.chain]||.5))*.7;
+  const decP=isCardano?Math.min(S.cardano.decScore/500,1):0;
+  // Center glow fades as decentralization grows
+  const centerAlpha=Math.max(.02,(1-decP)*.08+health*.05+pulse*.02);
+  const g=ctx.createRadialGradient(cx,cy,0,cx,cy,52+health*36);
+  g.addColorStop(0,`rgba(${cc},${centerAlpha})`);
+  g.addColorStop(.5,`rgba(0,150,255,${centerAlpha*.35})`);g.addColorStop(1,'transparent');
+  ctx.beginPath();ctx.arc(cx,cy,52+health*36,0,Math.PI*2);ctx.fillStyle=g;ctx.fill();
+  for(let ri=0;ri<3;ri++){
+    const rr=19+ri*12,sp=(.011+ri*.003)*(ri%2?1:-1);
+    ctx.beginPath();ctx.arc(cx,cy,rr,S.af*sp,S.af*sp+Math.PI*(1.2-ri*.15));
+    const ringA=(.18+pulse*.06)*(1-decP*.6);
+    ctx.strokeStyle=`rgba(${ri===0?'255,170,0':ri===1?cc:'0,200,255'},${ringA})`;
+    ctx.lineWidth=1.3;ctx.stroke();
+  }
+  // Democratic ring: appears and strengthens as decScore rises
+  if(decP>0.05&&isCardano){
+    const dr2=getDreps();
+    const Rc=Math.min(cW,cH)*.34*.92;
+    const ringA2=decP*.45+pulse*.06;
+    // Outer ring glow
+    ctx.beginPath();ctx.arc(cx,cy,Rc,0,Math.PI*2);
+    ctx.strokeStyle=`rgba(${cc},${ringA2*.5})`;
+    ctx.lineWidth=decP*2.5+.5;
+    ctx.setLineDash([6,8]);ctx.stroke();ctx.setLineDash([]);
+    // Ring label at top
+    if(decP>0.3){
+      ctx.save();
+      ctx.font=`bold ${Math.floor(6+decP*2)}px Orbitron`;
+      ctx.fillStyle=`rgba(${cc},${decP*.55})`;
+      ctx.textAlign='center';ctx.textBaseline='bottom';
+      ctx.fillText('◎ DEMOCRATIC RING',cx,cy-Rc-6);
+      ctx.restore();
+    }
+    // Peer connections between neighbouring bubbles (replaces center spokes at high dec)
+    if(decP>0.4&&S.bubbles.length>2){
+      const peerAlpha=(decP-.4)/.6*0.12;
+      for(let pi=0;pi<S.bubbles.length;pi++){
+        const pa2=S.bubbles[pi],pb2=S.bubbles[(pi+1)%S.bubbles.length];
+        ctx.beginPath();ctx.moveTo(pa2.x,pa2.y);ctx.lineTo(pb2.x,pb2.y);
+        ctx.strokeStyle=`rgba(${cc},${peerAlpha})`;
+        ctx.lineWidth=.6;ctx.setLineDash([2,6]);ctx.stroke();ctx.setLineDash([]);
+      }
+    }
+  }
+  if(S.chain!=='Cardano'){
+    ctx.fillStyle=`rgba(${cc},.48)`;ctx.font='bold 7px Orbitron';
+    ctx.textAlign='center';ctx.textBaseline='top';
+    ctx.fillText(`[ ${S.chain.toUpperCase()} VIEW ]`,cx,5);
+  }
+  // 3Dリング: 傾いた楕円で奥行き演出
+  for(let ri=0;ri<2;ri++){
+    const rAngle=S.af*(.006+ri*.003)*(ri%2?1:-1);
+    const rx=(45+ri*22)*(1+health*.3);
+    const ry=rx*.32; // 扁平率で傾きを表現
+    const tilt=ri*(Math.PI/5);
+    ctx.save();
+    ctx.translate(cx,cy);
+    ctx.rotate(tilt);
+    const ringA=(.12+pulse*.06)*(1-decP*.5);
+    // 背面半弧 (暗め)
+    ctx.beginPath();
+    ctx.ellipse(0,0,rx,ry,0,0,Math.PI);
+    ctx.strokeStyle=`rgba(${cc},${ringA*.5})`;
+    ctx.lineWidth=1.2;ctx.stroke();
+    // 前面半弧 (明るめ)
+    ctx.beginPath();
+    ctx.ellipse(0,0,rx,ry,0,Math.PI,Math.PI*2);
+    ctx.strokeStyle=`rgba(${cc},${ringA})`;
+    ctx.lineWidth=1.6;ctx.stroke();
+    ctx.restore();
+  }
+  ctx.font=`${15+pulse*3}px sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.globalAlpha=.68+pulse*.18;ctx.fillText('🌌',cx,cy);ctx.globalAlpha=1;
+  [
+    {lbl:'REV',val:'₳'+fmt(S.eco.rev),   col:'rgba(255,170,0,1)',a:-Math.PI/2},
+    {lbl:'TVL',val:'$'+fmt(S.eco.tvl),   col:'rgba(0,200,255,1)',a:Math.PI*.25},
+    {lbl:'TREAS',val:'₳'+fmt(S.eco.treasury),col:'rgba(0,255,136,1)',a:Math.PI*1.18},
+  ].forEach(st=>{
+    const sr=86,stx=cx+Math.cos(st.a)*sr,sty=cy+Math.sin(st.a)*sr;
+    ctx.fillStyle='rgba(0,255,136,.26)';ctx.font='5px Orbitron';
+    ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(st.lbl,stx,sty-4);
+    ctx.fillStyle=st.col;ctx.font='bold 7px Orbitron';ctx.fillText(st.val,stx,sty+3);
+    ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(stx,sty);
+    ctx.strokeStyle=st.col.replace(',1)',',0.055)');ctx.lineWidth=.5;ctx.stroke();
+  });
+  if(S.chain==='Cardano'){
+    // Player character: physics-based with drag
+    const p=S.player;
+    if(!p.dragging){
+      if(p.targetIdx>=0&&S.bubbles[p.targetIdx]){
+        const tb=S.bubbles[p.targetIdx];
+        const tdx=tb.x-p.x,tdy=tb.y-p.y,tdist=Math.sqrt(tdx*tdx+tdy*tdy)||1;
+        if(tdist>8){p.vx+=tdx/tdist*.6;p.vy+=tdy/tdist*.6;}
+      } else {
+        // Orbit center gently
+        const oa=S.af*.013;
+        const ox=cx+Math.cos(oa)*28,oy=cy+Math.sin(oa)*28;
+        p.vx+=(ox-p.x)*.04;p.vy+=(oy-p.y)*.04;
+      }
+      p.vx*=.88;p.vy*=.88;
+      p.x+=p.vx;p.y+=p.vy;
+    }
+    // Draw character
+    const psize=14+Math.sin(S.af*.06)*.5;
+    ctx.save();
+    // Shadow glow
+    if(p.targetIdx>=0){
+      ctx.shadowBlur=12;ctx.shadowColor='rgba(0,255,136,.45)';
+    }
+    ctx.font=psize+'px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(CHAR_EMO[S.charType],p.x,p.y);
+    ctx.restore();
+    // Trail
+    if(Math.abs(p.vx)>.5||Math.abs(p.vy)>.5){
+      ctx.beginPath();ctx.arc(p.x-p.vx*1.5,p.y-p.vy*1.5,2,0,Math.PI*2);
+      ctx.fillStyle='rgba(0,255,136,.18)';ctx.fill();
+    }
+  }
+  ctx.beginPath();ctx.arc(cx,cy,Math.min(cW,cH)*.36,0,Math.PI*2);
+  ctx.strokeStyle=`rgba(${cc},${.035+pulse*.018})`;ctx.lineWidth=.7;ctx.stroke();
+}
+
+// ═══════════════════════════════════════════
+// LASERS
+// ═══════════════════════════════════════════
+function fireLaser(idx,col,cb){
+  const b=S.bubbles[idx];if(!b)return;
+  const dx=b.x-cx,dy=b.y-cy,dist=Math.sqrt(dx*dx+dy*dy)||1;
+  const nx=-dy/dist,ny=dx/dist;
+  const ps=[];
+  for(let i=0;i<Math.floor(dist/8);i++){
+    ps.push({t:i/Math.floor(dist/8),sp:.018+Math.random()*.012,off:(Math.random()-.5)*5,r:Math.random()*2+.6});
+  }
+  S.lasers.push({x0:cx,y0:cy,x1:b.x,y1:b.y,dx,dy,nx,ny,dist,life:60,max:60,col,ps,done:false,cb});
+}
+function drawLasers(){
+  S.lasers=S.lasers.filter(l=>l.life>0);
+  S.lasers.forEach(l=>{
+    const prog=1-(l.life/l.max),a=l.life/l.max;
+    ctx.save();
+    ctx.shadowBlur=14;ctx.shadowColor=l.col+'0.75)';
+    const seg=16;
+    function path(){
+      ctx.beginPath();ctx.moveTo(l.x0,l.y0);
+      for(let s=1;s<=seg;s++){
+        const t=s/seg;if(t>prog+.07)break;
+        const w=Math.sin(t*Math.PI*5+S.af*.18)*2.5*(1-t);
+        ctx.lineTo(l.x0+l.dx*t+l.nx*w,l.y0+l.dy*t+l.ny*w);
+      }
+    }
+    ctx.strokeStyle=l.col+a+')';ctx.lineWidth=2;path();ctx.stroke();
+    ctx.shadowBlur=28;ctx.strokeStyle=l.col+(a*.22)+')';ctx.lineWidth=6;path();ctx.stroke();
+    ctx.restore();
+    l.ps.forEach(p=>{
+      p.t+=p.sp;if(p.t>prog||p.t>1)return;
+      const w=Math.sin(p.t*Math.PI*5+S.af*.18)*2.5*(1-p.t);
+      const ex=l.x0+l.dx*p.t+l.nx*(w+p.off),ey=l.y0+l.dy*p.t+l.ny*(w+p.off);
+      ctx.beginPath();ctx.arc(ex,ey,p.r,0,Math.PI*2);
+      ctx.fillStyle=l.col+(a*.6)+')';ctx.fill();
+    });
+    const tip=Math.min(prog+.07,1);
+    const tx2=l.x0+l.dx*tip,ty2=l.y0+l.dy*tip;
+    const pg=ctx.createRadialGradient(tx2,ty2,0,tx2,ty2,10);
+    pg.addColorStop(0,l.col+(a*.8)+')');pg.addColorStop(1,l.col+'0)');
+    ctx.beginPath();ctx.arc(tx2,ty2,10,0,Math.PI*2);ctx.fillStyle=pg;ctx.fill();
+    l.life-=2;
+    if(l.life<=0&&!l.done){l.done=true;if(l.cb)l.cb();}
+  });
+}
+
+// ═══════════════════════════════════════════
+// ENERGY FLOWS
+// ═══════════════════════════════════════════
+function addFlow(idx){if(!S.flows.find(f=>f.idx===idx))S.flows.push({idx,ps:[]});}
+function rmFlow(idx){S.flows=S.flows.filter(f=>f.idx!==idx);}
+function drawFlows(){
+  if(S.chain!=='Cardano'){S.flows=[];return;}
+  S.flows=S.flows.filter(f=>S.cardano.delegations.some(d=>d.idx===f.idx));
+  S.flows.forEach(f=>{
+    const b=S.bubbles[f.idx];if(!b)return;
+    const dx=b.x-cx,dy=b.y-cy,dist=Math.sqrt(dx*dx+dy*dy)||1;
+    const nx=-dy/dist,ny=dx/dist;
+    if(S.af%3===0)f.ps.push({t:0,sp:.01+Math.random()*.008,off:(Math.random()-.5)*3.5,r:Math.random()*1.3+.4});
+    f.ps=f.ps.filter(p=>p.t<1);
+    f.ps.forEach(p=>{
+      p.t+=p.sp;const a=Math.sin(p.t*Math.PI);
+      const w=Math.sin(p.t*Math.PI*4+S.af*.13)*1.8*(1-p.t);
+      ctx.beginPath();ctx.arc(cx+dx*p.t+nx*(w+p.off),cy+dy*p.t+ny*(w+p.off),p.r,0,Math.PI*2);
+      ctx.fillStyle=`rgba(0,255,136,${a*.45})`;ctx.fill();
+    });
+    const decPf=S.chain==='Cardano'?Math.min(S.cardano.decScore/500,1):0;
+    // As decentralization grows, spokes fade (peer links in drawCenter replace them)
+    const spokeA=(.025+Math.sin(S.af*.035)*.012)*(1-decPf*.7);
+    if(spokeA>.004){
+      ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(b.x,b.y);
+      ctx.strokeStyle=`rgba(0,255,136,${spokeA})`;
+      ctx.lineWidth=.5;ctx.setLineDash([3,9]);ctx.stroke();ctx.setLineDash([]);
+    }
+  });
+}
+
+// ═══════════════════════════════════════════
+// INBOUND ENERGY BEAMS
+// ═══════════════════════════════════════════
+function spawnBeam(){
+  const m=calcM(getDreps());
+  const baseG=GINI_BASE[S.chain]||.5;
+  const q=Math.max(0,1-(S.chain==='Cardano'?m.gini:baseG));
+  const ang=Math.random()*Math.PI*2;
+  const ed=Math.max(cW,cH)*.56;
+  const cc=CHAIN_COLS[S.chain]||'0,255,136';
+  S.beams.push({x:cx+Math.cos(ang)*ed,y:cy+Math.sin(ang)*ed,
+    ang:ang+Math.PI,life:90+Math.floor(q*38),max:128,col:cc,q,
+    w:q>.7?1.8:q>.5?1.1:.6,arrived:false});
+}
+function drawBeams(){
+  S.beams=S.beams.filter(b=>b.life>0);
+  const m=calcM(getDreps());
+  const q=Math.max(0,1-(S.chain==='Cardano'?m.gini:GINI_BASE[S.chain]||.5));
+  if(S.af%5===0&&Math.random()<q*.16)spawnBeam();
+  if(q>.65&&S.af%54===0)for(let i=0;i<Math.floor(q*2);i++)setTimeout(spawnBeam,i*180);
+  S.beams.forEach(b=>{
+    const prog=1-(b.life/b.max),a=b.life/b.max;
+    const td=Math.sqrt((b.x-cx)**2+(b.y-cy)**2)||1;
+    const cd=td*(1-prog);
+    const ex=cx+Math.cos(b.ang+Math.PI)*cd,ey=cy+Math.sin(b.ang+Math.PI)*cd;
+    ctx.save();
+    ctx.shadowBlur=7+b.q*11;ctx.shadowColor=`rgba(${b.col},.5)`;
+    ctx.strokeStyle=`rgba(${b.col},${a*.42})`;ctx.lineWidth=b.w;
+    ctx.beginPath();ctx.moveTo(b.x,b.y);ctx.lineTo(ex,ey);ctx.stroke();
+    const pg=ctx.createRadialGradient(ex,ey,0,ex,ey,6+b.q*5);
+    pg.addColorStop(0,`rgba(${b.col},${a*.7})`);pg.addColorStop(1,`rgba(${b.col},0)`);
+    ctx.beginPath();ctx.arc(ex,ey,6+b.q*5,0,Math.PI*2);ctx.fillStyle=pg;ctx.fill();
+    ctx.restore();
+    b.life-=2;
+    if(cd<25&&!b.arrived){b.arrived=true;
+      const cg=ctx.createRadialGradient(cx,cy,0,cx,cy,34);
+      cg.addColorStop(0,`rgba(${b.col},.18)`);cg.addColorStop(1,`rgba(${b.col},0)`);
+      ctx.beginPath();ctx.arc(cx,cy,34,0,Math.PI*2);ctx.fillStyle=cg;ctx.fill();}
+  });
+}
+
+// ═══════════════════════════════════════════
+// RADAR
+// ═══════════════════════════════════════════
+function drawRadar(){
+  rdx.clearRect(0,0,148,148);
+  const rcx=74,rcy=74,R=60;
+  const pulse=Math.sin(S.af*.03)*.5+.5;
+  const bg=rdx.createRadialGradient(rcx,rcy,0,rcx,rcy,R);
+  bg.addColorStop(0,'rgba(0,16,26,.94)');bg.addColorStop(1,'rgba(0,6,12,.98)');
+  rdx.beginPath();rdx.arc(rcx,rcy,R+4,0,Math.PI*2);rdx.fillStyle=bg;rdx.fill();
+  [.33,.66,1].forEach(f=>{
+    rdx.beginPath();rdx.arc(rcx,rcy,R*f,0,Math.PI*2);
+    rdx.strokeStyle=`rgba(0,255,136,${.055+f*.025})`;rdx.lineWidth=.5;rdx.stroke();
+  });
+  const sA=(S.af*.022)%(Math.PI*2);
+  rdx.save();rdx.translate(rcx,rcy);
+  for(let tr=0;tr<12;tr++){
+    const trA=sA-(tr/12)*(Math.PI/2.2);
+    rdx.beginPath();rdx.moveTo(0,0);rdx.arc(0,0,R,trA,trA+Math.PI/16);rdx.closePath();
+    rdx.fillStyle=`rgba(0,255,136,${(1-tr/12)*.055})`;rdx.fill();
+  }
+  rdx.beginPath();rdx.moveTo(0,0);rdx.lineTo(Math.cos(sA)*R,Math.sin(sA)*R);
+  rdx.strokeStyle=`rgba(0,255,136,${.36+pulse*.12})`;rdx.lineWidth=1.3;rdx.stroke();
+  rdx.restore();
+  const sorted=[...S.l1].sort((a,b)=>b.score-a.score);
+  const maxS=sorted[0].score;
+  sorted.forEach((l,i)=>{
+    const ang=(i/sorted.length)*Math.PI*2-Math.PI/2;
+    const dist=R*.2+R*.72*(l.score/maxS)**.5;
+    const bx=rcx+Math.cos(ang)*dist,by=rcy+Math.sin(ang)*dist;
+    const isA=S.chain===l.name;
+    rdx.beginPath();rdx.arc(bx,by,isA?5.2:3.8,0,Math.PI*2);rdx.fillStyle=l.col;rdx.fill();
+    if(isA){rdx.beginPath();rdx.arc(bx,by,7+pulse*1.6,0,Math.PI*2);rdx.strokeStyle=l.col;rdx.lineWidth=1;rdx.stroke();}
+    rdx.fillStyle=isA?l.col:'rgba(0,255,136,.45)';rdx.font=`${isA?'bold ':''} 6px Orbitron`;
+    rdx.textAlign='center';rdx.textBaseline='bottom';rdx.fillText(l.ico+' '+l.name,bx,by-5.5);
+  });
+  rdx.fillStyle='rgba(0,255,136,.3)';rdx.font='5px Orbitron';
+  rdx.textAlign='center';rdx.textBaseline='middle';rdx.fillText('GALAXY',rcx,rcy);
+}
+document.getElementById('l1Radar').addEventListener('click',e=>{
+  const r=radarC.getBoundingClientRect();
+  const mx=e.clientX-r.left,my=e.clientY-r.top;
+  const rcx=74,rcy=74,R=60;
+  const sorted=[...S.l1].sort((a,b)=>b.score-a.score);
+  const maxS=sorted[0].score;
+  let best=null,bd=16;
+  sorted.forEach((l,i)=>{
+    const ang=(i/sorted.length)*Math.PI*2-Math.PI/2;
+    const dist=R*.2+R*.72*(l.score/maxS)**.5;
+    const d=Math.hypot(mx-rcx-Math.cos(ang)*dist,my-rcy-Math.sin(ang)*dist);
+    if(d<bd){bd=d;best=l;}
+  });
+  if(best)switchChain(best.name);
+});
+
+// ═══════════════════════════════════════════
+// MAIN LOOP
+// ═══════════════════════════════════════════
+let _looping=false;
+function loop(){
+  if(cW<10){S.af++;requestAnimationFrame(loop);return;}
+  ctx.clearRect(0,0,cW,cH);
+  ctx.save();
+  ctx.translate(vp.x,vp.y);ctx.scale(vp.sc,vp.sc);
+  drawBeams();drawFlows();
+  // Update decProgress every frame
+  const isCardano=S.chain==='Cardano';
+  const decT=isCardano?Math.min(S.cardano.decScore/500,1):0;
+  const dr=getDreps();
+
+  S.bubbles.forEach((b,i)=>{
+    b.wb=(b.wb||0)+.013;
+    if(isCardano&&dr[i]){
+      // Live isDel check every frame (委任状態をリアルタイム反映)
+      const isDel=S.cardano.delegations.some(dl=>dl.idx===i);
+      const isNew=i>=CARDANO_BASE.length;
+      if(isDel!==b.isDel){ b.isDel=isDel; } // state change → spring kicks in
+      const tgt=bubbleTarget(i,dr.length,dr[i],decT,isDel,isNew&&!isDel);
+      b.tx=tgt.x; b.ty=tgt.y;
+    }
+    // Spring: 新規未委任は弱いバネ(中心周回)、委任済みは強いバネ(外周へ引力)
+    if(b.tx!==undefined){
+      const isDel=b.isDel;
+      const springK = isDel ? 0.028 : 0.016;
+      const damp    = isDel ? 0.84  : 0.78;
+      b.vx=(b.vx||0)*damp+(b.tx-b.x)*springK;
+      b.vy=(b.vy||0)*damp+(b.ty-b.y)*springK;
+      b.x+=b.vx; b.y+=b.vy;
+    }
+    // 新規未委任バブルは中心をゆっくり旋回するオフセットを加える
+    const isNew=b.isNew;
+    const wobbleAmp = (isNew&&!b.isDel) ? .22 : .08;
+    b.x+=Math.sin(b.wb+b.ph)*wobbleAmp;
+    b.y+=Math.cos(b.wb*.7+b.ph)*wobbleAmp*.9;
+    drawFacs(b);drawBubble(b,S.hovIdx===i);
+  });
+
+  // ── リアルタイム soft repulsion: バブルが重ならないよう毎フレーム押し合う ──
+  for(let a=0;a<S.bubbles.length-1;a++){
+    for(let b2=a+1;b2<S.bubbles.length;b2++){
+      const pa=S.bubbles[a], pb=S.bubbles[b2];
+      const ra=pa.r+pa.extraR, rb=pb.r+pb.extraR;
+      const ddx=pb.x-pa.x, ddy=pb.y-pa.y;
+      const dist=Math.sqrt(ddx*ddx+ddy*ddy)||.01;
+      const minD=ra+rb+8;
+      if(dist<minD){
+        const force=(minD-dist)/minD*.55; // 強めの反発
+        const nx=ddx/dist, ny=ddy/dist;
+        pa.vx-=nx*force; pa.vy-=ny*force;
+        pb.vx+=nx*force; pb.vy+=ny*force;
+      }
+    }
+  }
+
+  drawEcoShield();drawLasers();drawCenter();
+  ctx.restore();
+  S.af++;requestAnimationFrame(loop);
+}
+let _starLoop=false;
+function starLoop(){tickStars();requestAnimationFrame(starLoop);}
+let _radarLoop=false;
+function radarLoop(){drawRadar();requestAnimationFrame(radarLoop);}
+
+// ═══════════════════════════════════════════
+// MOUSE / TOUCH / ZOOM
+// ═══════════════════════════════════════════
+let drag=false,lmx=0,lmy=0;
+function s2w(sx2,sy2){return{x:(sx2-vp.x)/vp.sc,y:(sy2-vp.y)/vp.sc};}
+function findB(wx,wy){
+  for(let i=0;i<S.bubbles.length;i++){
+    const b=S.bubbles[i];if(Math.hypot(wx-b.x,wy-b.y)<b.r+b.extraR+5)return i;
+  }return -1;
+}
+mainC.addEventListener('wheel',e=>{
+  e.preventDefault();
+  const r=mainC.getBoundingClientRect();
+  const sx2=e.clientX-r.left,sy2=e.clientY-r.top;
+  const f=e.deltaY<0?1.12:.89;
+  const ns=Math.max(.2,Math.min(5,vp.sc*f));
+  vp.x=sx2-(sx2-vp.x)*(ns/vp.sc);vp.y=sy2-(sy2-vp.y)*(ns/vp.sc);vp.sc=ns;
+},{passive:false});
+mainC.addEventListener('mousedown',e=>{
+  if(e.button===2)return;
+  const r=mainC.getBoundingClientRect();
+  const w=s2w(e.clientX-r.left,e.clientY-r.top);
+  const p=S.player;
+  const distP=Math.hypot(w.x-p.x,w.y-p.y);
+  if(S.chain==='Cardano'&&distP<20){
+    // Grab player character
+    p.dragging=true;p.targetIdx=-1;p.vx=0;p.vy=0;
+    mainC.style.cursor='grabbing';
+  } else {
+    drag=true;lmx=e.clientX;lmy=e.clientY;mainC.style.cursor='grabbing';
+  }
+});
+window.addEventListener('mouseup',e=>{
+  const p=S.player;
+  if(p.dragging){
+    // Check if dropped on a bubble → set as target
+    const r=mainC.getBoundingClientRect();
+    const w=s2w(e.clientX-r.left,e.clientY-r.top);
+    const found=findB(w.x,w.y);
+    if(found>=0){p.targetIdx=found;toast(`⚡ ${getDreps()[found].n} に向かう！`,'ok');}
+    p.dragging=false;
+  }
+  drag=false;mainC.style.cursor=S.hovIdx>=0?'pointer':'grab';
+});
+window.addEventListener('mousemove',e=>{
+  const p=S.player;
+  if(p.dragging){
+    const r=mainC.getBoundingClientRect();
+    const w=s2w(e.clientX-r.left,e.clientY-r.top);
+    p.x=w.x;p.y=w.y;p.vx=0;p.vy=0;
+  } else if(drag){vp.x+=e.clientX-lmx;vp.y+=e.clientY-lmy;lmx=e.clientX;lmy=e.clientY;}
+});
+mainC.addEventListener('dblclick',()=>{vp.x=0;vp.y=0;vp.sc=1;});
+mainC.addEventListener('mousemove',e=>{
+  if(drag)return;
+  const r=mainC.getBoundingClientRect();
+  const sx2=e.clientX-r.left,sy2=e.clientY-r.top;
+  const w=s2w(sx2,sy2);
+  const found=findB(w.x,w.y);
+  S.hovIdx=found;
+  mainC.style.cursor=found>=0?'pointer':'grab';
+  if(found>=0){
+    showTip(found,e.clientX,e.clientY);
+    // ホバーはツールチップ表示のみ。委任先はクリックでのみ変更
+  }else document.getElementById('htip').classList.remove('on');
+});
+mainC.addEventListener('mouseleave',()=>{S.hovIdx=-1;drag=false;document.getElementById('htip').classList.remove('on');mainC.style.cursor='grab';});
+mainC.addEventListener('click',e=>{
+  if(drag)return;
+  const r=mainC.getBoundingClientRect();
+  const w=s2w(e.clientX-r.left,e.clientY-r.top);
+  const found=findB(w.x,w.y);
+  if(found>=0&&S.chain==='Cardano'){
+    S.selectedIdx=found;
+    document.getElementById('dc_sel').value=found;selChange();
+    toast(`▶ ${getDreps()[found].n} を委任ターゲットに設定`,'ok');
+    // 選択リングをパルス
+    const b=S.bubbles[found]; if(b)b.pulse=1.4;
+  }
+});
+// Touch pinch
+let _pt=0;
+mainC.addEventListener('touchstart',e=>{if(e.touches.length===2)_pt=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);},{passive:true});
+mainC.addEventListener('touchmove',e=>{
+  if(e.touches.length===2){const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);vp.sc=Math.max(.2,Math.min(5,vp.sc*(d/(_pt||d))));_pt=d;}
+},{passive:true});
+// Zoom buttons
+document.getElementById('zp').onclick=()=>{vp.sc=Math.min(vp.sc*1.2,5);};
+document.getElementById('zm').onclick=()=>{vp.sc=Math.max(vp.sc/1.2,.2);};
+document.getElementById('zr').onclick=()=>{vp.x=0;vp.y=0;vp.sc=1;};
+
+function showTip(idx,cx2,cy2){
+  const d=getDreps()[idx];if(!d)return;
+  const TL={wallet:'WALLET',corp:'CORP',foundation:'FOUND.',individual:'INDIV.',spo:'SPO',protocol:'PROTO',community:'COMM.'};
+  const wf=d.wp>70?'#ff3355':d.wp>40?'#ffaa00':'#00ff88';
+  document.getElementById('ht_nm').textContent=d.em+' '+d.n;
+  document.getElementById('ht_tp').textContent=TL[d.tp]||d.tp;
+  document.getElementById('ht_pw').textContent=d.p.toFixed(2)+'%';
+  const vrel=document.getElementById('ht_vr');vrel.textContent=d.vr+'%';vrel.style.color=d.vr>80?'var(--g)':d.vr>60?'var(--a)':'var(--r)';
+  document.getElementById('ht_dl').textContent=d.del.toLocaleString();
+  document.getElementById('ht_dy').textContent=d.avgD+'d';
+  document.getElementById('ht_wp').textContent=d.wp+'%';document.getElementById('ht_wp').style.color=wf;
+  const wb=document.getElementById('ht_wb');wb.style.width=d.wp+'%';wb.style.background=`linear-gradient(90deg,${wf},${wf}88)`;
+  const wn=document.getElementById('ht_wn');
+  if(d.wp>70||d.ina>60){wn.style.display='block';wn.textContent=d.ina>60?`🔴 ${d.ina}日間未投票`:`🐋 クジラ${d.wp}%支配`;}
+  else wn.style.display='none';
+  document.getElementById('ht_cm').textContent=d.cmt||'';
+  document.getElementById('ht_ht').style.display=S.chain==='Cardano'?'block':'none';
+  const tip=document.getElementById('htip'),tw=228,th=210;
+  let tx=cx2+12,ty=cy2-88;
+  if(tx+tw>innerWidth-8)tx=cx2-tw-12;
+  if(ty<44)ty=44;if(ty+th>innerHeight*.76)ty=innerHeight*.76-th;
+  tip.style.left=tx+'px';tip.style.top=ty+'px';tip.classList.add('on');
+}
+
+// ═══════════════════════════════════════════
+// CHAIN SWITCHING — saves/restores Cardano
+// ═══════════════════════════════════════════
+function switchChain(name){
+  // Save Cardano state before leaving
+  if(S.chain==='Cardano'){
+    // Save bubble extraR
+    S.cardano.extraR={};
+    S.bubbles.forEach(b=>{S.cardano.extraR[b.i]=b.extraR;});
+    // delegations, facilities, decScore, xp, lvl already live in S.cardano
+  }
+  S.chain=name;
+  S.lasers=[];S.beams=[];S.flows=[];
+  buildBubbles();
+  // If returning to Cardano, restore flows
+  if(name==='Cardano'){
+    S.cardano.delegations.forEach(dl=>addFlow(dl.idx));
+  }
+  updateChainTabs();updateHUD();updateBars();updateStatus();buildSelect();
+  const isC=name==='Cardano';
+  const exec=document.getElementById('dc_exec');
+  exec.disabled=!isC;exec.style.opacity=isC?'1':'.3';
+  document.getElementById('rdmsg').style.display=isC?'none':'block';
+  document.getElementById('htip').classList.remove('on');
+  const m=calcM(getDreps());
+  const nak=isC?m.nak:NAK_BASE[name]||m.nak;
+  const gini=isC?m.gini:GINI_BASE[name]||m.gini;
+  const l=S.l1.find(x=>x.name===name);
+  toast(`${l?.ico||''} ${name} — NAK:${nak} GINI:${gini.toFixed(2)}${isC?'':' [READ-ONLY]'}`,isC?'ok':'amber');
+}
+function buildChainTabs(){
+  const el=document.getElementById('chainTabs');el.innerHTML='';
+  S.l1.forEach(l=>{
+    const btn=document.createElement('button');
+    btn.className='ctab'+(S.chain===l.name?' on':'');
+    btn.textContent=l.ico+' '+l.name;
+    btn.onclick=()=>switchChain(l.name);
+    el.appendChild(btn);
+  });
+}
+function updateChainTabs(){
+  const tabs=document.querySelectorAll('.ctab');
+  tabs.forEach((btn,i)=>{if(i<S.l1.length)btn.classList.toggle('on',S.l1[i].name===S.chain);});
+  const chainEl = document.getElementById('h_chain');
+  if(S.liveMode && S.chain==='Cardano'){
+    chainEl.innerHTML = 'CARDANO <span class="live-tag live-pulse">● LIVE</span>';
+  } else {
+    chainEl.textContent = S.chain + (S.liveMode?'':' [DEMO]');
+  }
+}
+
+// ═══════════════════════════════════════════
+// CONSOLE
+// ═══════════════════════════════════════════
+function buildSelect(){
+  const sel=document.getElementById('dc_sel');sel.innerHTML='';
+  getDreps().forEach((d,i)=>{
+    const o=document.createElement('option');o.value=i;
+    const tag=d.ina>60?'[DEAD]':d.wp>70?'[WHALE]':d.wp<25?'[CLEAN]':'';
+    o.textContent=`${tag} ${d.n} (${d.p.toFixed(1)}%)`;sel.appendChild(o);
+  });
+}
+function selChange(){
+  const idx=parseInt(document.getElementById('dc_sel').value);
+  const ex=S.cardano.delegations.find(d=>d.idx===idx);
+  const hint=document.getElementById('dc_hint');
+  if(S.dpMode==='rec'&&ex){
+    document.getElementById('dc_sld').max=ex.ada;
+    hint.style.display='block';document.getElementById('dc_dep').textContent=ex.ada.toLocaleString();
+  }else{
+    document.getElementById('dc_sld').max=10000000;hint.style.display='none';
+  }
+  document.getElementById('dc_sld').value=0;document.getElementById('dc_amt').value='';
+}
+function sldChange(){document.getElementById('dc_amt').value=document.getElementById('dc_sld').value;}
+function setPct(p){
+  const idx=parseInt(document.getElementById('dc_sel').value);
+  const ex=S.cardano.delegations.find(d=>d.idx===idx);
+  const base=S.dpMode==='rec'&&ex?ex.ada:5000000;
+  const v=Math.round(base*p/100);
+  document.getElementById('dc_amt').value=v;document.getElementById('dc_sld').value=v;
+}
+function setMode(m){
+  S.dpMode=m;
+  const bd=document.getElementById('btn_dep'),br=document.getElementById('btn_rec');
+  bd.classList.toggle('on',m==='dep');bd.classList.toggle('dep',m==='dep');
+  br.classList.toggle('on',m==='rec');br.classList.toggle('rec',m==='rec');
+  const btn=document.getElementById('dc_exec');
+  if(m==='dep'){btn.textContent='▲ DEPLOY DELEGATION';btn.className='dexec dep';}
+  else{btn.textContent='▼ RECALL DELEGATION';btn.className='dexec rec';}
+  selChange();
+}
+function execCmd(){
+  if(S.chain!=='Cardano'){toast('Cardanoのみ委任可能','warn');return;}
+  if(S.liveMode){ toast('⚠ LIVEモードは観測専用です。実際の委任はウォレットから行ってください。','warn'); return; }
+  if(S.dpMode==='dep')doDelegate();else doRecall();
+}
+function doDelegate(){
+  const idx=parseInt(document.getElementById('dc_sel').value);
+  const amt=parseInt(document.getElementById('dc_amt').value)||0;
+  if(amt<=0){toast('委任量を入力','warn');return;}
+  const d=S.cardano.dreps[idx];
+  const b=S.bubbles[idx];
+  const col=d.wp>70?'rgba(255,80,80,':d.wp<25?'rgba(0,255,136,':'rgba(0,180,255,';
+  fireLaser(idx,col,()=>{
+    // Update delegations
+    const ex=S.cardano.delegations.findIndex(x=>x.idx===idx);
+    if(ex>=0)S.cardano.delegations[ex].ada+=amt;
+    else S.cardano.delegations.push({idx,ada:amt});
+    if(!S.cardano.facilities[idx])S.cardano.facilities[idx]=[];
+    // Grow bubble
+    if(b){
+      const grow=Math.sqrt(amt/5000000)*26;
+      b.extraR=(b.extraR||0)+grow;
+      S.cardano.extraR[idx]=(S.cardano.extraR[idx]||0)+grow;
+      b.pulse=1.3;
+      addFlow(idx);
+      // Player auto-tracks first delegation target
+      if(S.cardano.delegations.length===1)S.player.targetIdx=idx;
+    }
+    // XP
+    let xpG=Math.floor(amt/1000)*2;
+    if(d.wp<20)xpG=Math.floor(xpG*2.5);else if(d.wp<40)xpG=Math.floor(xpG*1.8);else if(d.wp>70)xpG=Math.floor(xpG*.4);
+    if(S.cardano.delegations.length>=3)xpG=Math.floor(xpG*1.3);
+    addXP(xpG);
+    // Dec score
+    let sd=Math.floor(amt/500);
+    if(d.wp<25)sd=Math.floor(sd*2.2);else if(d.wp>70)sd=Math.floor(-sd*.5);
+    if(d.ina>60)sd=-Math.abs(sd);
+    S.cardano.decScore=Math.max(0,S.cardano.decScore+sd);
+    // Facility
+    const facs=S.cardano.facilities[idx];
+    if(d.p<8&&!d.ina&&facs.length<5&&S.cardano.decScore%40<10){
+      facs.push({ico:FAC_ICOS[facs.length%FAC_ICOS.length],an:0});
+      setTimeout(()=>toast(`${d.n}: 施設建設完了！`,'amber'),600);
+    }
+    const card=S.l1.find(x=>x.isMe);if(card)card.score+=Math.max(sd,0)*8;
+    checkSpawn();
+    updateAll();
+    toast(d.ina>60?`⚠️ ${d.n} INACTIVE`:d.wp>70?`🐋 WHALE ALERT — ペナルティ`:d.wp<25?`✓ OPTIMAL XP x2.5`:`委任: ₳${fmt(amt)} → ${d.n}`,d.ina>60||d.wp>70?'warn':'ok');
+    // アドバイザーセリフ
+    if(d.ina>60){addAdvisorLine('titan_decay',{name:d.n,days:d.ina});}
+    else if(d.p<2){addAdvisorLine('newbie_spawn',{name:d.n});}
+    else{addAdvisorLine('delegation_ok',{name:d.n});}
+    updatePhase();
+  });
+  document.getElementById('dc_amt').value='';document.getElementById('dc_sld').value=0;
+}
+function doRecall(){
+  const idx=parseInt(document.getElementById('dc_sel').value);
+  const amt=parseInt(document.getElementById('dc_amt').value)||0;
+  const ex=S.cardano.delegations.find(x=>x.idx===idx);
+  if(!ex){toast('アクティブな委任なし','warn');return;}
+  if(amt<=0){toast('量を入力','warn');return;}
+  if(amt>ex.ada){toast(`最大: ${ex.ada.toLocaleString()} ADA`,'warn');return;}
+  const d=S.cardano.dreps[idx],b=S.bubbles[idx];
+  ex.ada-=amt;
+  if(ex.ada<=0){S.cardano.delegations=S.cardano.delegations.filter(x=>x.idx!==idx);rmFlow(idx);}
+  if(b){
+    const shrink=Math.sqrt(amt/5000000)*26;
+    b.extraR=Math.max(0,(b.extraR||0)-shrink);
+    S.cardano.extraR[idx]=Math.max(0,(S.cardano.extraR[idx]||0)-shrink);
+    b.pulse=1.14;
+  }
+  addXP(Math.floor(amt/5000)+2);
+  S.cardano.decScore=Math.max(0,S.cardano.decScore+(d.wp>70?Math.floor(amt/800):-Math.floor(amt/1200)));
+  const card=S.l1.find(x=>x.isMe);if(card)card.score=Math.max(0,card.score-Math.floor(amt/200));
+  updateAll();
+  document.getElementById('dc_amt').value='';document.getElementById('dc_sld').value=0;selChange();
+  toast(`回収: ₳${fmt(amt)} from ${d.n}`,'amber');
+}
+
+// ═══════════════════════════════════════════
+// NEW DREP SPAWN
+// ═══════════════════════════════════════════
+function checkSpawn(){
+  const th=60;
+  if(Math.floor(S.cardano.decScore/th)>Math.floor((S.cardano.decScore-1)/th)
+    &&S.cardano.spawned<NEW_DREP_POOL.length){
+    spawnDrep('dec');
+  }
+}
+// 既存プールから or 動的生成でDRepを追加
+function spawnDrepCore(nd, reason){
+  const idx = S.cardano.dreps.length;
+  S.cardano.dreps.push(nd);
+  S.cardano.facilities[idx]=[];
+  buildBubbles();buildSelect();
+  // 新バブルは中心(cx,cy)スタート
+  const nb=S.bubbles[S.bubbles.length-1];
+  if(nb){ nb.x=cx+(Math.random()-.5)*14; nb.y=cy+(Math.random()-.5)*14;
+    nb.vx=(Math.random()-.5)*.5; nb.vy=(Math.random()-.5)*.5;
+    const or=nb.r; nb.r=0; let t=0;
+    const iv=setInterval(()=>{ t++; nb.r=Math.min(or,or*(t/22));
+      if(t>=22)clearInterval(iv); },40);
+  }
+  for(let i=0;i<6;i++) setTimeout(spawnBeam,i*120);
+  const reasons={rev:'📈 収益成長による新規参入！',dec:'🌐 分散化進展による新規参入！',auto:'⚡ 銀河拡張による新規参入！'};
+  toast(reasons[reason]||`🌱 新規DRep: ${nd.em} ${nd.n}`,'ok');
+}
+
+function spawnDrep(reason){
+  const tmpl=NEW_DREP_POOL[S.cardano.spawned];
+  if(!tmpl) return;
+  S.cardano.spawned++;
+  const nd={...tmpl, p:.3+Math.random()*.5, avgD:30+Math.floor(Math.random()*60),
+    ina:0, del:Math.floor(10+Math.random()*90)};
+  spawnDrepCore(nd, reason);
+}
+
+// 収益成長時の継続スポーン（プール枯渇後も動的生成）
+const DYN_POOL=[
+  {em:'🌟',tp:'individual',wp:9 ,vr:78},{em:'💫',tp:'community', wp:14,vr:82},
+  {em:'🔮',tp:'individual',wp:7 ,vr:85},{em:'🌈',tp:'community', wp:11,vr:79},
+  {em:'⭐',tp:'spo',       wp:16,vr:76},{em:'🔥',tp:'individual',wp:6 ,vr:90},
+  {em:'💠',tp:'foundation',wp:20,vr:83},{em:'🎯',tp:'individual',wp:8 ,vr:88},
+  {em:'🧬',tp:'corp',      wp:28,vr:86},{em:'🛸',tp:'community', wp:12,vr:81},
+];
+let _dynIdx=0;
+function spawnDrepFromGrowth(){
+  if(S.chain!=='Cardano') return;
+  if(S.cardano.spawned < NEW_DREP_POOL.length){
+    spawnDrep('rev'); return;
+  }
+  // 動的生成: ランダムな名前＋データ
+  const tmpl = DYN_POOL[_dynIdx % DYN_POOL.length]; _dynIdx++;
+  const totalExisting = S.cardano.dreps.length;
+  const names=['Node'+totalExisting,'Voter'+totalExisting,'Gov'+totalExisting,
+    'DRep'+totalExisting,'Block'+totalExisting,'Chain'+totalExisting];
+  const nd = {...tmpl,
+    n: names[Math.floor(Math.random()*names.length)],
+    p: .2+Math.random()*.4,
+    avgD: 20+Math.floor(Math.random()*80),
+    ina:0, del:Math.floor(5+Math.random()*60),
+    cmt:`チェーン成長で誕生した新DRep。クジラ率${tmpl.wp}%。`
+  };
+  spawnDrepCore(nd,'auto');
+}
+
+// ═══════════════════════════════════════════
+// XP / LEVEL
+// ═══════════════════════════════════════════
+function addXP(n){
+  S.cardano.xp+=n;
+  let prev=S.cardano.lvl;
+  for(let i=LEVELS.length-1;i>=0;i--){if(S.cardano.xp>=LEVELS[i].min){S.cardano.lvl=i;break;}}
+  if(S.cardano.lvl>prev)showLvl();
+  updateHUD();
+}
+
+// ═══════════════════════════════════════════
+// ECONOMY TICK
+// ═══════════════════════════════════════════
+// ─── BCP訓練: 非活動DRep強制停止 ───
+function triggerBCPEvent(){
+  if(S.chain!=='Cardano')return;
+  const dr=S.cardano.dreps;
+  // ina>0のDRepからランダムに一体を突然停止
+  const candidates=dr.map((d,i)=>({d,i})).filter(x=>x.d.ina>30&&!x.d.bcpStopped);
+  // または稀に活動中DRepも停止させる (現実のBCP)
+  const activeCandidates=dr.map((d,i)=>({d,i})).filter(x=>x.d.ina===0&&!x.d.bcpStopped&&Math.random()<.15);
+  const pool=[...candidates,...activeCandidates];
+  if(pool.length===0)return;
+  const target=pool[Math.floor(Math.random()*pool.length)];
+  const d=dr[target.i];
+  d.bcpStopped=true;
+  d.bcpStoppedAt=Date.now();
+  d.vr=0; // 投票率ゼロに
+  d.ina=Math.max(d.ina,1); // 非活動扱い
+
+  // アドバイザー警告セリフ
+  const isActive=candidates.indexOf(target)===-1;
+  const bcpEntry={
+    who:'BYRON',cls:'alert',
+    txt:`「⚠ BCP訓練発動：<em>${d.n}</em>が突然停止しました！${isActive?'活動中のDRepでも':''}この惑星に委任しているホルダーは即座に再配置が必要です。指揮官——バックアッププランを実行せよ！」`,
+    time:Date.now(),tab:'byron'
+  };
+  S.advisorState.logBuffer.unshift(bcpEntry);
+  if(S.advisorState.logBuffer.length>20)S.advisorState.logBuffer.pop();
+  if(S.advisorState.panelOpen)renderAdvisorLog();
+
+  toast(`🚨 BCP: ${d.n} が突然停止！委任を再配置せよ`,'warn');
+
+  // 停止したDRepに委任しているプレイヤーへの緊急警告
+  const affected=S.cardano.delegations.find(dl=>dl.idx===target.i);
+  if(affected){
+    setTimeout(()=>{
+      const urgEntry={
+        who:'VASIL',cls:'alert',
+        txt:`「緊急計算：あなたの委任先<em>${d.n}</em>が停止中。現在<em>₳${fmt(affected.ada)}</em>が死んだ防衛線に眠っています。今すぐRecallして再配置しないと分散スコアが下落します！」`,
+        time:Date.now(),tab:'vasil'
+      };
+      S.advisorState.logBuffer.unshift(urgEntry);
+      if(S.advisorState.panelOpen)renderAdvisorLog();
+    },4000);
+  }
+
+  // 60秒後に自動復旧 (BCP訓練終了)
+  setTimeout(()=>{
+    d.bcpStopped=false;
+    d.vr=Math.max(d.vr,20); // 低い投票率で復旧
+    const recovEntry={
+      who:'SHEYLA',cls:'',
+      txt:`「BCP訓練終了：<em>${d.n}</em>が復旧しました。しかし投票率は<em>${d.vr}%</em>に低下しています。この訓練から何を学びましたか、指揮官？」`,
+      time:Date.now(),tab:'sheyla'
+    };
+    S.advisorState.logBuffer.unshift(recovEntry);
+    if(S.advisorState.panelOpen)renderAdvisorLog();
+    toast(`✓ BCP復旧: ${d.n} がオンラインに戻りました`,'ok');
+    updateAll();
+  },60000);
+
+  updateAll();
+}
+
+function geoTick(){
+  const cnt=S.cardano.delegations.length;
+  const facs=Object.values(S.cardano.facilities).reduce((s,f)=>s+f.length,0);
+  const dec=1+Math.min(S.cardano.decScore/500,1.2);
+  const revG=Math.floor((cnt*150+facs*100)*dec*(Math.random()*.4+.8));
+  S.eco.rev+=revG;
+  S.eco.tvl+=Math.floor(facs*3000000*(Math.random()*.3+.85));
+  S.eco.treasury+=Math.floor(S.eco.tvl*.00013)+Math.floor(revG*.2);
+
+  // 収益マイルストーン → 新規DRep参入（継続的に）
+  // 最初は200Kごと、のちに500Kごとのペースでスポーン
+  const threshold = S.cardano.spawned < 4 ? 200000 : 500000;
+  const revMilestone = Math.floor(S.eco.rev / threshold);
+  if(revMilestone > (S.cardano.lastRevMilestone||0)){
+    S.cardano.lastRevMilestone = revMilestone;
+    // プールが尽きても動的生成
+    setTimeout(()=>{ spawnDrepFromGrowth(); }, 800 + Math.random()*1200);
+  }
+
+  // Cardano スコア上昇
+  const card=S.l1.find(x=>x.isMe);
+  if(card) card.score += Math.floor(facs*.8+cnt*.4);
+  updateBars();
+}
+
+// ═══════════════════════════════════════════
+// L1 GROWTH
+// ═══════════════════════════════════════════
+function growL1(){
+  S.l1cool--;
+  S.l1.forEach(l=>{
+    if(l.isMe)return;
+    l.score+=Math.floor(l.growth*(90+Math.random()*75));
+    if(Math.random()<.07)l.score+=Math.floor(l.growth*360);
+    if(Math.random()<.03)l.score=Math.max(l.score-200,100);
+  });
+  if(S.l1cool<=0&&Math.random()<.3){
+    const ev=L1_EVENTS[Math.floor(Math.random()*L1_EVENTS.length)];
+    const tgt=S.l1.find(l=>l.name===ev.chain);
+    if(tgt){tgt.score+=Math.floor(tgt.growth*520*ev.boost);toast(ev.msg,'amber');}
+    S.l1cool=5;
+  }
+  const sorted=[...S.l1].sort((a,b)=>b.score-a.score);
+  const rank=sorted.findIndex(x=>x.isMe);
+  if(rank>=3&&Math.random()<.4)toast(`ALERT: CARDANO RANK #${rank+1} — 委任で逆転せよ！`,'warn');
+  else if(rank===0&&Math.random()<.2)toast('CARDANO LEADS THE GALAXY!','ok');
+  tickShield();
+  // BCP訓練: 稀にランダム発動 (約2分に1回の確率)
+  if(S.chain==='Cardano'&&S.cardano.delegations.length>=2&&Math.random()<.12&&!S._bcpCooldown){
+    S._bcpCooldown=true;
+    setTimeout(()=>{S._bcpCooldown=false;},90000);
+    setTimeout(triggerBCPEvent,2000);
+  }
+}
+
+// ═══════════════════════════════════════════
+// VOTE
+// ═══════════════════════════════════════════
+function triggerVote(){
+  if(S.voteActive){setTimeout(triggerVote,12000);return;}
+  S.voteActive=true;
+  const prop=PROPOSALS[Math.floor(Math.random()*PROPOSALS.length)];
+  const decBefore=S.cardano.decScore;
+  // Open gov panel and show active vote
+  const av=document.getElementById('activeVote');
+  av.classList.add('on');
+  document.getElementById('av_nm').textContent=prop.ico+' '+prop.nm;
+  document.getElementById('av_dsc').textContent=prop.dsc;
+  document.getElementById('av_bdg').textContent='予算: ₳'+fmt(prop.bdg);
+  document.getElementById('av_yes').style.width='0%';
+  document.getElementById('av_yp').textContent='0';document.getElementById('av_np').textContent='100';
+  // 収支バッジ (支出 vs 期待収入)
+  const avfs=document.getElementById('avf_spend');
+  const avfe=document.getElementById('avf_earn');
+  avfs.textContent='支出'+fmtShort(prop.bdg);avfs.style.display='inline-block';
+  avfe.textContent='収入+'+fmtShort(prop.tvl);avfe.style.display='inline-block';
+  // Auto-open gov panel + badge
+  if(!S.govOpen)toggleGovPanel();
+  S.newVoteCount++;
+  const badge=document.getElementById('gpbadge');badge.textContent=S.newVoteCount;badge.classList.add('on');
+
+  const decF=Math.min(S.cardano.decScore/200,1),target=28+decF*50;let cur=0;
+  const iv=setInterval(()=>{
+    cur=Math.min(cur+(Math.random()*3+1),target+Math.random()*10);
+    const yes=Math.min(Math.round(cur),100);
+    document.getElementById('av_yes').style.width=yes+'%';
+    document.getElementById('av_yp').textContent=yes;document.getElementById('av_np').textContent=100-yes;
+    if(cur>=target+5){
+      clearInterval(iv);const passed=yes>50;
+      av.classList.remove('on');
+      const yesP=yes;
+      // Record history
+      const record={prop,passed,yesP,
+        tvlGain:passed?prop.tvl:0,
+        decGain:passed?prop.sc:0,
+        treasurySpent:passed?prop.bdg:0,
+        decBefore,
+        time:new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'})};
+      S.govHistory.unshift(record);
+      renderGovHistory();
+      if(passed){
+        addXP(prop.xp);S.cardano.decScore+=prop.sc;
+        S.eco.treasury=Math.max(0,S.eco.treasury-prop.bdg);
+        S.eco.tvl+=prop.tvl;
+        setTimeout(()=>{S.eco.treasury+=Math.floor(prop.tvl*.16);updateBars();},3000);
+        const card=S.l1.find(x=>x.isMe);if(card)card.score+=prop.sc*14;
+        S.cardano.delegations.forEach(dl=>{
+          setTimeout(()=>fireLaser(dl.idx,'rgba(255,170,0,',()=>{
+            const b2=S.bubbles[dl.idx];if(b2){b2.pulse=1.35;b2.extraR=(b2.extraR||0)+3;}
+          }),Math.random()*500);
+        });
+        updateAll();
+        // govStats更新
+        if(!S.govStats)S.govStats={totalSpend:0,totalEarn:0,totalTvl:0,history:[]};
+        S.govStats.totalSpend+=prop.bdg;
+        const earnAmt=Math.floor(prop.tvl*.18)+Math.floor(prop.bdg*.05);
+        S.govStats.totalEarn+=earnAmt;
+        S.govStats.totalTvl+=prop.tvl;
+        S.govStats.history.push({tvl:prop.tvl,spend:prop.bdg,earn:earnAmt,t:Date.now()});
+        if(S.govStats.history.length>16)S.govStats.history.shift();
+        updateGovSummary();
+        // アドバイザーセリフ
+        addAdvisorLine('vote_pass',{nm:prop.nm,bdg:fmtShort(prop.bdg)});
+        toast(`✅ ${prop.nm} 可決！₳${fmt(prop.bdg)}執行→TVL+$${fmt(prop.tvl)}`,'ok');
+      } else {
+        // 否決時セリフ
+        const need=Math.max(0,100-S.cardano.decScore);
+        addAdvisorLine('vote_fail',{nm:prop.nm,yp:yesP,need});
+        toast(`❌ ${prop.nm} 否決 — YES ${yesP}% (分散化が不十分)`,'warn');
+      }
+      S.voteActive=false;
+    }
+  },60);
+  setTimeout(triggerVote,22000+Math.random()*13000);
+}
+function closeVote(){S.voteActive=false;}
+
+// ── 収支サマリー更新 ──────────────────────────
+function updateGovSummary(){
+  const gs=S.govStats;
+  if(!gs)return;
+  const net=gs.totalEarn-gs.totalSpend;
+  document.getElementById('gs_spend').textContent='₳'+fmtShort(gs.totalSpend);
+  document.getElementById('gs_earn').textContent='₳'+fmtShort(gs.totalEarn);
+  document.getElementById('gs_tvl').textContent='$'+fmtShort(gs.totalTvl);
+  const netEl=document.getElementById('gs_net');
+  netEl.textContent=(net>=0?'₳+':'-₳')+fmtShort(Math.abs(net));
+  netEl.style.color=net>=0?'var(--a)':'var(--r)';
+  drawGovChart();
+}
+
+// ── 収益チャート (TVL推移スパークライン) ────────
+function drawGovChart(){
+  const cv=document.getElementById('govChart');
+  if(!cv)return;
+  const gs=S.govStats;
+  const dpr=window.devicePixelRatio||1;
+  const W=cv.parentElement.clientWidth-20;
+  const H=44;
+  cv.width=W*dpr; cv.height=H*dpr;
+  cv.style.width=W+'px'; cv.style.height=H+'px';
+  const ctx2=cv.getContext('2d');
+  ctx2.scale(dpr,dpr);
+
+  if(!gs||!gs.history||gs.history.length<2){
+    ctx2.fillStyle='rgba(0,255,136,.08)';ctx2.fillRect(0,0,W,H);
+    ctx2.fillStyle='rgba(0,255,136,.25)';ctx2.font='8px Share Tech Mono';
+    ctx2.textAlign='center';ctx2.fillText('提案可決でグラフ生成',W/2,H/2+3);
+    return;
+  }
+
+  const hist=gs.history;
+  const tvls=hist.map(h=>h.tvl);
+  const earns=hist.map(h=>h.earn);
+  const spends=hist.map(h=>h.spend);
+  const maxV=Math.max(...tvls,1);
+  const n=hist.length;
+
+  // 背景
+  ctx2.fillStyle='rgba(0,0,0,.35)';ctx2.fillRect(0,0,W,H);
+
+  // グリッド横線
+  [.25,.5,.75].forEach(p=>{
+    ctx2.beginPath();ctx2.moveTo(0,H*(1-p));ctx2.lineTo(W,H*(1-p));
+    ctx2.strokeStyle='rgba(0,255,136,.06)';ctx2.lineWidth=1;ctx2.stroke();
+  });
+
+  // TVL面グラフ
+  ctx2.beginPath();
+  hist.forEach((h,i)=>{
+    const x=i/(n-1)*(W-4)+2;
+    const y=H-(h.tvl/maxV)*(H-6)-3;
+    i===0?ctx2.moveTo(x,y):ctx2.lineTo(x,y);
+  });
+  const lastX=W-2, lastY=H-(tvls[n-1]/maxV)*(H-6)-3;
+  ctx2.lineTo(lastX,H);ctx2.lineTo(2,H);ctx2.closePath();
+  const grad=ctx2.createLinearGradient(0,0,0,H);
+  grad.addColorStop(0,'rgba(0,255,136,.28)');
+  grad.addColorStop(1,'rgba(0,255,136,.03)');
+  ctx2.fillStyle=grad;ctx2.fill();
+
+  // TVLライン
+  ctx2.beginPath();
+  hist.forEach((h,i)=>{
+    const x=i/(n-1)*(W-4)+2;
+    const y=H-(h.tvl/maxV)*(H-6)-3;
+    i===0?ctx2.moveTo(x,y):ctx2.lineTo(x,y);
+  });
+  ctx2.strokeStyle='rgba(0,255,136,.8)';ctx2.lineWidth=1.5;ctx2.stroke();
+
+  // 収入ライン (細い)
+  const maxE=Math.max(...earns,1);
+  ctx2.beginPath();
+  hist.forEach((h,i)=>{
+    const x=i/(n-1)*(W-4)+2;
+    const y=H-(h.earn/maxE)*(H-10)-5;
+    i===0?ctx2.moveTo(x,y):ctx2.lineTo(x,y);
+  });
+  ctx2.strokeStyle='rgba(255,170,0,.55)';ctx2.lineWidth=1;ctx2.setLineDash([3,2]);ctx2.stroke();
+  ctx2.setLineDash([]);
+
+  // ドット: 最新ポイント
+  const lx=W-2, ly=H-(tvls[n-1]/maxV)*(H-6)-3;
+  ctx2.beginPath();ctx2.arc(lx,ly,3,0,Math.PI*2);
+  ctx2.fillStyle='#00ff88';ctx2.fill();
+
+  // 凡例
+  ctx2.font=`${5*dpr/dpr}px Share Tech Mono`;
+  ctx2.fillStyle='rgba(0,255,136,.6)';ctx2.textAlign='left';ctx2.fillText('TVL',3,7);
+  ctx2.fillStyle='rgba(255,170,0,.6)';ctx2.fillText('収益',28,7);
+}
+
+
+// ═══════════════════════════════════════════
+// LIVE MODE — Koios API Integration
+// ═══════════════════════════════════════════
+const KOIOS_BASE = 'https://api.koios.rest/api/v1';
+
+async function fetchKoiosDreps(){
+  // トップDRep50件を取得 (シンプルなエンドポイント)
+  const res = await fetch(
+    `${KOIOS_BASE}/drep_list?limit=50&offset=0`,
+    {headers:{'accept':'application/json','content-type':'application/json'}}
+  );
+  if(!res.ok) throw new Error(`Koios HTTP ${res.status}`);
+  const data = await res.json();
+  if(!Array.isArray(data)) throw new Error('Unexpected response format');
+  return data;
+}
+
+async function fetchKoiosNetworkTotals(){
+  const res = await fetch(
+    `${KOIOS_BASE}/network/totals`,
+    {headers:{'accept':'application/json'}}
+  );
+  if(!res.ok) throw new Error(`HTTP ${res.status}`);
+  const data = await res.json();
+  return data[0] || data;
+}
+
+async function fetchKoiosDrepInfo(drepIds){
+  // drep_infoでメタデータ(名前)取得 — 最大10件ずつ
+  const ids = drepIds.slice(0,10);
+  const res = await fetch(`${KOIOS_BASE}/drep_info`, {
+    method:'POST',
+    headers:{'accept':'application/json','content-type':'application/json'},
+    body: JSON.stringify({_drep_ids: ids})
+  });
+  if(!res.ok) return [];
+  return res.json();
+}
+
+// Koiosデータ → ゲームDRep形式に変換
+function koiosDrepToGame(raw, infoMap, totalVotingPower){
+  const info = infoMap[raw.drep_id] || {};
+  const amtStr = raw.amount || raw.voting_power || '0';
+  const amt = parseInt(amtStr) || 0;
+  const pct = totalVotingPower > 0 ? (amt/totalVotingPower*100) : 0.1;
+  const del = parseInt(raw.delegators||0);
+  const active = raw.active !== false;
+  const inaDays = active ? 0 : 45 + Math.floor(Math.random()*60);
+
+  // メタデータから名前を取得
+  const meta = info.meta_json || info.metadata || {};
+  const rawName = meta.name || meta.givenName || raw.drep_id?.slice(0,12) || 'Unknown';
+  const name = rawName.length > 14 ? rawName.slice(0,13)+'…' : rawName;
+
+  // 投票力からクジラ率を推定 (集中度のプロキシ)
+  const wp = del <= 5 ? 90 : del <= 20 ? 70 : del <= 100 ? 50 : del <= 500 ? 30 : 15;
+
+  // タイプ推定
+  const tp = info.has_script ? 'protocol' :
+    del > 5000 ? 'wallet' :
+    del > 1000 ? 'corp' :
+    del > 100  ? 'community' : 'individual';
+
+  const em = !active ? '💀' :
+    del > 5000 ? '🔴' :
+    del > 1000 ? '🏢' :
+    del > 100  ? '⭐' :
+    del > 10   ? '💡' : '🌱';
+
+  const cmt = !active
+    ? `${inaDays}日間非活動。委任を再検討してください。`
+    : del > 5000 ? `大型ウォレット系DRep。${del.toLocaleString()}名が委任。`
+    : del > 100  ? `${del}名が委任中。投票力${pct.toFixed(2)}%。`
+    : `小規模個人DRep。${del}名が委任。分散化に貢献。`;
+
+  return {
+    n: name,
+    p: Math.max(pct, 0.05),
+    tp, vr: active ? 70 + Math.floor(Math.random()*25) : Math.floor(Math.random()*15),
+    avgD: Math.max(del, 1),
+    ina: inaDays,
+    del,
+    wp,
+    em,
+    cmt,
+    _live: true,
+    _drepId: raw.drep_id,
+    _lovelace: amt,
+  };
+}
+
+// LIVEモード起動
+async function activateLiveMode(){
+  S.liveMode = true;
+  S.liveData.loading = true;
+  S.liveData.error = null;
+
+  // UIフィードバック
+  const btn = document.getElementById('modeBtn');
+  if(btn){btn.textContent='⟳ SYNCING...';btn.style.color='var(--c)';}
+  const banner = document.getElementById('liveBanner');
+  if(banner){ banner.style.display='flex'; }
+  updateLiveBanner('CONNECTING TO KOIOS...', true);
+
+  try {
+    updateLiveBanner('FETCHING DREP LIST...', true);
+    const [rawDreps, netTotals] = await Promise.all([
+      fetchKoiosDreps(),
+      fetchKoiosNetworkTotals().catch(()=>null)
+    ]);
+
+    updateLiveBanner(`FOUND ${rawDreps.length} DREPS — LOADING METADATA...`, true);
+
+    // メタデータ取得 (上位10件のみ)
+    const topIds = rawDreps.slice(0,10).map(d=>d.drep_id).filter(Boolean);
+    const infoArr = topIds.length > 0
+      ? await fetchKoiosDrepInfo(topIds).catch(()=>[])
+      : [];
+    const infoMap = {};
+    infoArr.forEach(info=>{ if(info.drep_id) infoMap[info.drep_id]=info; });
+
+    // 総投票力を計算
+    const totalVP = rawDreps.reduce((s,d)=>s+parseInt(d.amount||d.voting_power||0),0);
+
+    // ゲーム形式に変換
+    const gameDreps = rawDreps.map(d=>koiosDrepToGame(d, infoMap, totalVP));
+    S.liveData.dreps = gameDreps;
+    S.liveData.lastFetch = Date.now();
+    S.liveData.networkTotals = netTotals;
+    S.liveData.loading = false;
+
+    // ネットワーク総量でエコノミー更新
+    if(netTotals){
+      const treasury = parseInt(netTotals.treasury||0);
+      if(treasury>0) S.eco.treasury = Math.floor(treasury/1000000); // lovelace→ADA
+    }
+
+    // Cardanoチェーンに切り替えて再描画
+    S.chain = 'Cardano';
+    buildBubbles();
+    buildSelect();
+    updateAll();
+    updatePhase();
+
+    updateLiveBanner(`LIVE — ${gameDreps.length} DREPS · 最終更新: ${new Date().toLocaleTimeString('ja-JP')}`, false);
+    if(btn){btn.textContent='📡 LIVE';btn.style.color='var(--c)';btn.style.borderColor='rgba(0,255,238,.5)';}
+
+    toast(`📡 LIVEモード: ${gameDreps.length}件のDRepデータを取得`, 'ok');
+
+    // アドバイザーセリフ
+    const liveEntry = {
+      who:'SHEYLA', cls:'',
+      txt:`「📡 Koiosブロックチェーンデータと同期完了。<em>実際の${gameDreps.length}件のDRep</em>が銀河に展開されました。これが現実のCardanoガバナンスの姿です、指揮官。」`,
+      time:Date.now(), tab:'sheyla'
+    };
+    S.advisorState.logBuffer.unshift(liveEntry);
+    if(S.advisorState.panelOpen) renderAdvisorLog();
+
+    // 5分ごと自動更新
+    if(window._liveRefresh) clearInterval(window._liveRefresh);
+    window._liveRefresh = setInterval(()=>{
+      if(S.liveMode) refreshLiveData();
+    }, 5 * 60 * 1000);
+
+  } catch(err) {
+    S.liveData.loading = false;
+    S.liveData.error = err.message;
+    S.liveMode = false;
+    const errMsg = err.message || 'Unknown error';
+    if(banner) updateLiveBanner(`⚠ ERROR: ${errMsg} — DEMOモードに戻ります`, false);
+    if(btn){btn.textContent='📡 DEMO';btn.style.color='var(--dim)';btn.style.borderColor='';}
+    setTimeout(()=>{ if(banner) banner.style.display='none'; }, 5000);
+    toast(`⚠ Koios: ${errMsg}`, 'warn');
+    console.error('[LIVE MODE] Koios fetch error:', err);
+  }
+}
+
+function deactivateLiveMode(){
+  S.liveMode = false;
+  if(window._liveRefresh){ clearInterval(window._liveRefresh); window._liveRefresh=null; }
+  const banner = document.getElementById('liveBanner');
+  if(banner) banner.style.display='none';
+  const btn = document.getElementById('modeBtn');
+  if(btn){btn.textContent='📡 DEMO';btn.style.color='var(--dim)';btn.style.borderColor='';}
+  // DEMOデータに戻す
+  S.cardano.dreps = CARDANO_BASE.map(d=>({...d,bcpStopped:false,bcpStoppedAt:null}));
+  buildBubbles(); buildSelect(); updateAll();
+  toast('DEMOモードに戻りました', 'amber');
+}
+
+function toggleLiveMode(){
+  if(S.liveMode) deactivateLiveMode();
+  else activateLiveMode();
+}
+
+async function refreshLiveData(){
+  try {
+    updateLiveBanner('AUTO-REFRESH...', true);
+    const rawDreps = await fetchKoiosDreps();
+    const totalVP = rawDreps.reduce((s,d)=>s+parseInt(d.amount||d.voting_power||0),0);
+    const gameDreps = rawDreps.map(d=>koiosDrepToGame(d,{},totalVP));
+    S.liveData.dreps = gameDreps;
+    S.liveData.lastFetch = Date.now();
+    buildBubbles(); buildSelect(); updateAll();
+    updateLiveBanner(`LIVE · 自動更新: ${new Date().toLocaleTimeString('ja-JP')}`, false);
+  } catch(e) {
+    updateLiveBanner(`REFRESH ERROR — ${e.message}`, false);
+  }
+}
+
+function updateLiveBanner(txt, spinning){
+  const el = document.getElementById('liveBannerTxt');
+  const sp = document.getElementById('liveSpinner');
+  if(el) el.textContent = txt;
+  if(sp) sp.style.display = spinning ? 'block' : 'none';
+}
+
+// getDreps: LIVEモード分岐は元関数内で処理
+
+function toggleGovPanel(){
+  S.govOpen=!S.govOpen;
+  document.getElementById('govPanel').classList.toggle('open',S.govOpen);
+  if(S.govOpen){
+    S.newVoteCount=0;document.getElementById('gpbadge').classList.remove('on');
+    updateGovSummary();
+  }
+}
+
+// ═══════════════════════════════════════════
+// ADVISOR SYSTEM
+// ═══════════════════════════════════════════
+const ADVISOR_DATA={
+  byron:{
+    em:'🏛️',name:'BYRON',role:'// 創世期の参謀 · 歴史分析',
+    statusLoop:['SCANNING HISTORY...','PATTERN ANALYSIS...','ALERT MONITORING...'],
+    color:'var(--g)'
+  },
+  sheyla:{
+    em:'📊',name:'SHEYLA',role:'// 分散化の設計者 · 指標監視',
+    statusLoop:['MONITORING GINI...','RING ANALYSIS...','DEC.SCORE CALC...'],
+    color:'var(--c)'
+  },
+  vasil:{
+    em:'⚡',name:'VASIL',role:'// 最適化の専門家 · 効率計算',
+    statusLoop:['OPTIMIZING...','VOTE RATE CALC...','EFFICIENCY SCAN...'],
+    color:'var(--a)'
+  },
+  uroboros:{
+    em:'⬡',name:'OUROBOROS',role:'// 量子AI · 全データ統合',
+    statusLoop:['QUANTUM ANALYSIS...','ALL DATA SYNTH...','PHASE COMPUTING...'],
+    color:'#e879f9'
+  }
+};
+
+const PHASES=[
+  {id:'ouroboros',tag:'⬡ PHASE-A : OUROBOROS',desc:'円環維持モード — 持続的な分散化を維持せよ',col:'var(--c)'},
+  {id:'hydra',   tag:'🐙 PHASE-B : HYDRA',    desc:'緊急多頭対応 — 複数の脅威に同時対処せよ',col:'var(--r)'},
+  {id:'relay',   tag:'⚡ PHASE-C : RELAY',    desc:'高速委任モード — L2並みの素早さで対応せよ',col:'var(--a)'},
+  {id:'genesis', tag:'🌟 PHASE-D : GENESIS',  desc:'新時代創成モード — 新人DRepを銀河に育てよ',col:'var(--g)'},
+];
+
+// アドバイザーセリフデータベース
+const ADVISOR_LINES={
+  // 衰退DRep検知
+  titan_decay:[
+    {who:'BYRON',cls:'',txt:'「報告：<em>{name}</em>の活動ログに停滞を確認。<em>{days}日間</em>、有効な投票記録が更新されていません。かつての巨大勢力も今や眠れる惑星……委任の回収を推奨します。」'},
+    {who:'BYRON',cls:'alert',txt:'「警告：<em>{name}</em>の不作為により、予算案が複数回スルーされました。SleepingTitanやGhostNodeに委任を続けるのは銀河の損失です、指揮官。」'},
+    {who:'SHEYLA',cls:'alert',txt:'「観測：<em>{name}</em>の投票率が<em>{days}日間</em>ゼロを記録。Yoroi・Eternlの自動委任と同じ罠です。意識的な委任変更を推奨します。」'},
+  ],
+  // Nakamotoアラート
+  nakamoto:[
+    {who:'SHEYLA',cls:'alert',txt:'「⚠ <em>Nakamoto係数が{val}に低下</em>。銀河の意思決定が少数に支配されつつあります。防衛円環の再構築を急いでください！」'},
+    {who:'OUROBOROS',cls:'alert',txt:'「量子AI判定：Nakamoto係数<em>{val}</em>は臨界値を下回っています。<em>PHASE-B : HYDRA</em>への移行を推奨します。指揮官、承認しますか？」'},
+    {who:'BYRON',cls:'',txt:'「過去のデータが示している。Nakamoto係数が<em>{val}</em>以下になると、銀河は少数の意志で支配されてきた。今こそ歴史から学べ。」'},
+  ],
+  // 高GINI係数
+  gini_warn:[
+    {who:'SHEYLA',cls:'',txt:'「GINIインデックス<em>{val}</em>を検知。富の偏在が防衛円環を形骸化させています。中規模DRepへの分散配置を推奨します。」'},
+  ],
+  // 無意識指揮官
+  unconscious:[
+    {who:'SHEYLA',cls:'alert',txt:'「警告：無意識の指揮官たちが<em>{name}</em>に集中委任中！YoroiとEternlのデフォルト設定が銀河を歪めています。上位3 DRepへの集中率<em>{pct}%</em>超——対抗せよ！」'},
+    {who:'VASIL',cls:'',txt:'「計算完了：ウォレットの自動委任がCardanoF・Yoroi・Eternlに集中しています。あと<em>{turns}ターン</em>で防衛円環が崩壊する計算です。Cerkoryn・Tempo.vote・Meshへの分散を推奨。」'},
+    {who:'BYRON',cls:'alert',txt:'「歴史が繰り返されようとしている。かつてGenesis Keysで3組織が支配した時代の再来だ。Nakamoto係数を上げよ——Sidan Lab、Kyle Solomon、Sociousへ委任せよ！」'},
+  ],
+  // 新人DRep出現
+  newbie_spawn:[
+    {who:'SHEYLA',cls:'',txt:'「スキャン：<em>{name}</em>がセクターに出現。CardanoFoundationのDRepパイオニアプログラム出身の新星です。今は小さくとも、育てれば銀河の未来を支える存在になります。」'},
+    {who:'BYRON',cls:'',txt:'「10年後の銀河を守るのは、YoroiでもEMURGOでもない——<em>{name}</em>のような次世代DRepだ。Catalyst、ZK Builder、Voltaire DAOへの委任が銀河の多様性を守る。」'},
+    {who:'SHEYLA',cls:'',txt:'「覚えているか指揮官——CardanoFoundationがTempo.vote、Sidan Lab、Meshに委任した理由を。<em>{name}</em>もまた、その精神を継ぐ新星かもしれません。」'},
+  ],
+  // 委任成功
+  delegation_ok:[
+    {who:'VASIL',cls:'',txt:'「確認：<em>{name}</em>への委任を処理完了。防衛円環のバランスが改善しています。」'},
+    {who:'SHEYLA',cls:'',txt:'「観測：<em>{name}</em>への投資を確認。分散化スコアが上昇中。この調子です、指揮官！」'},
+  ],
+  // 投票可決
+  vote_pass:[
+    {who:'VASIL',cls:'',txt:'「✅ <em>{nm}</em>可決を確認！予算<em>₳{bdg}</em>が銀河発展に投資されます。TVL増加を予測中……」'},
+    {who:'BYRON',cls:'',txt:'「よくやった。この一票が、銀河の歴史に刻まれる。予算は未来への種だ。」'},
+  ],
+  // 投票否決
+  vote_fail:[
+    {who:'SHEYLA',cls:'',txt:'「❌ <em>{nm}</em>は否決されました。YES票<em>{yp}%</em>——分散化が不十分なためです。委任先を見直してください。」'},
+    {who:'VASIL',cls:'',txt:'「計算：可決率を上げるには、分散化スコアをあと<em>{need}ポイント</em>上げる必要があります。」'},
+  ],
+  // フェーズ移行
+  phase_change:[
+    {who:'OUROBOROS',cls:'alert',txt:'「⬡ 量子AI判定完了。<em>{phase}</em>への移行を推奨します。指揮官、全データを統合した結果です。」'},
+  ],
+  // 覚醒
+  newbie_awake:[
+    {who:'SHEYLA',cls:'',txt:'「観測：育成中の<em>「{name}」</em>が初の独自Recordを提出！銀河に新しい夜明けが訪れています……指揮官、あなたの投資が実を結びました！」'},
+  ],
+};
+
+// State拡張
+S.advisorState={
+  activeTab:'byron',
+  panelOpen:false,
+  logBuffer:[],       // 表示中のセリフ
+  lastPhaseIdx:0,
+  unconsciousTimer:0,
+  statusFrame:0,
+};
+if(!S.govStats)S.govStats={totalSpend:0,totalEarn:0,totalTvl:0,history:[]};
+
+function toggleAdvisorPanel(){
+  const S2=S.advisorState;
+  S2.panelOpen=!S2.panelOpen;
+  document.getElementById('advisorPanel').classList.toggle('open',S2.panelOpen);
+  const btn=document.getElementById('apToggle');
+  btn.classList.toggle('open',S2.panelOpen);
+  btn.style.left=S2.panelOpen?'200px':'0';
+}
+
+function switchAdvisorTab(tab){
+  S.advisorState.activeTab=tab;
+  // タブUI
+  ['byron','sheyla','vasil','uroboros'].forEach(t=>{
+    const el=document.getElementById('apt_'+t);
+    if(el)el.classList.toggle('on',t===tab);
+  });
+  // アドバイザーカード更新
+  const ad=ADVISOR_DATA[tab];
+  if(ad){
+    document.getElementById('ap_avatar').textContent=ad.em;
+    document.getElementById('ap_name').textContent=ad.name;
+    document.getElementById('ap_name').style.color=ad.color;
+    document.getElementById('ap_role').textContent=ad.role;
+  }
+  renderAdvisorLog();
+}
+
+function addAdvisorLine(key,vars){
+  const lines=ADVISOR_LINES[key];
+  if(!lines||!lines.length)return;
+  const tmpl=lines[Math.floor(Math.random()*lines.length)];
+  let txt=tmpl.txt;
+  if(vars)Object.entries(vars).forEach(([k,v])=>{
+    txt=txt.replaceAll('{'+k+'}',v);
+  });
+  const entry={who:tmpl.who,cls:tmpl.cls||'',txt,time:Date.now(),
+    tab:tmpl.who==='OUROBOROS'?'uroboros':
+        tmpl.who==='SHEYLA'?'sheyla':
+        tmpl.who==='VASIL'?'vasil':'byron'};
+  const buf=S.advisorState.logBuffer;
+  buf.unshift(entry);
+  if(buf.length>20)buf.pop();
+
+  // パネルが開いていれば再描画
+  if(S.advisorState.panelOpen)renderAdvisorLog();
+
+  // バッジ表示 (パネル閉じ時)
+  if(!S.advisorState.panelOpen&&tmpl.cls==='alert'){
+    const btn=document.getElementById('apToggle');
+    btn.style.boxShadow='0 0 12px var(--r)';
+    btn.style.borderColor='var(--r)';
+    setTimeout(()=>{btn.style.boxShadow='';btn.style.borderColor='';},4000);
+  }
+}
+
+function renderAdvisorLog(){
+  const el=document.getElementById('advisorLog');
+  if(!el)return;
+  const activeTab=S.advisorState.activeTab;
+  const buf=S.advisorState.logBuffer;
+  if(buf.length===0){
+    el.innerHTML='<div class="ap-empty">銀河を観察中...<br><span style="color:rgba(0,255,136,.3)">委任を開始すると<br>情報が流れ始める</span></div>';
+    return;
+  }
+  el.innerHTML='';
+  buf.forEach(entry=>{
+    const div=document.createElement('div');
+    div.className='ap-bubble'+(entry.cls?' '+entry.cls:'');
+    if(entry.tab)div.classList.add(entry.tab);
+    div.innerHTML=`<div class="ap-bubble-who">${entry.who}</div><div class="ap-bubble-text">${entry.txt}</div>`;
+    el.appendChild(div);
+  });
+}
+
+// フェーズ更新 (量子AI判断)
+function updatePhase(){
+  const {nak,gini}=calcM(S.cardano.dreps);
+  const dec=S.cardano.decScore;
+  const inactCount=S.cardano.dreps.filter(d=>d.ina>60).length;
+  const spawnCount=S.cardano.dreps.filter(d=>d.p<1&&d.ina===0).length;
+
+  let phaseIdx=0;
+  if(nak<=3||inactCount>=3)phaseIdx=1;         // HYDRA: 緊急
+  else if(dec<50&&S.cardano.delegations.length>0)phaseIdx=2; // RELAY: 加速
+  else if(spawnCount>=2&&dec>100)phaseIdx=3;   // GENESIS: 新人育成
+  else phaseIdx=0;                              // OUROBOROS: 通常
+
+  const ph=PHASES[phaseIdx];
+  const tagEl=document.getElementById('ap_phase_tag');
+  const descEl=document.getElementById('ap_phase_desc');
+  if(tagEl){tagEl.textContent=ph.tag;tagEl.style.color=ph.col;}
+  if(descEl)descEl.textContent=ph.desc;
+
+  // フェーズ変化時にセリフ発火
+  if(phaseIdx!==S.advisorState.lastPhaseIdx){
+    S.advisorState.lastPhaseIdx=phaseIdx;
+    if(phaseIdx>0){
+      addAdvisorLine('phase_change',{phase:ph.tag});
+    }
+  }
+
+  // NAKAMOTOアラートバナー
+  const nakEl=document.getElementById('nakAlert');
+  if(nakEl){
+    if(nak<=3){
+      nakEl.classList.add('on');
+      document.getElementById('nak_alert_val').textContent='係数: '+nak;
+      document.getElementById('nak_alert_msg').textContent=
+        nak<=1?'🚨 銀河が1人に支配されています！今すぐ委任を分散せよ！':
+        nak<=2?'⚠️ 2人だけで銀河を支配中。分散化が急務です！':
+        '⚠️ 防衛線が脆弱です。小規模DRepへ分散委任せよ！';
+    }else{
+      nakEl.classList.remove('on');
+    }
+  }
+}
+
+function dismissNakAlert(){
+  document.getElementById('nakAlert').classList.remove('on');
+}
+
+// 無意識指揮官AI (バックグラウンドで大型DRepに自動委任)
+function tickUnconsciousAI(){
+  if(S.chain!=='Cardano')return;
+  const dreps=S.cardano.dreps;
+  // 上位3 DRepを探す
+  const sorted=[...dreps].map((d,i)=>({...d,i})).sort((a,b)=>b.p-a.p);
+  const top3=sorted.slice(0,3);
+  // 上位への集中率計算
+  const totalP=dreps.reduce((s,d)=>s+d.p,0)||1;
+  const top3pct=Math.round(top3.reduce((s,d)=>s+d.p,0)/totalP*100);
+
+  // 上位DRepに少しパワーを追加 (無意識委任シミュ)
+  top3.forEach(d=>{
+    dreps[d.i].p=Math.min(dreps[d.i].p+0.08,25);
+  });
+  // 下位は相対的に縮む
+  sorted.slice(5).forEach(d=>{
+    dreps[d.i].p=Math.max(dreps[d.i].p-0.02,0.1);
+  });
+
+  // 集中率が70%超えたら警告
+  if(top3pct>70&&Math.random()<.35){
+    addAdvisorLine('unconscious',{name:top3[0].n,pct:top3pct,turns:Math.floor((top3pct-70)/5)+2});
+  }
+}
+
+// 衰退DRepスキャン
+function scanDecayDreps(){
+  S.cardano.dreps.forEach((d,i)=>{
+    if(d.ina>60&&Math.random()<.3){
+      addAdvisorLine('titan_decay',{name:d.n,days:d.ina});
+    }
+    // 非活動日数を少し増やす (動的劣化)
+    if(d.ina>0&&Math.random()<.15){
+      S.cardano.dreps[i].ina=Math.min(d.ina+1,150);
+    }
+  });
+}
+
+// GINIアラートスキャン
+function scanGini(){
+  const {nak,gini}=calcM(S.cardano.dreps);
+  if(gini>0.65&&Math.random()<.3){
+    addAdvisorLine('gini_warn',{val:gini.toFixed(2)});
+  }
+  // Nakamotoアラートセリフ
+  if(nak<=5&&Math.random()<.25){
+    addAdvisorLine('nakamoto',{val:nak});
+  }
+}
+
+// selAdvisor (Boot画面で選択)
+function selAdvisor(name,btn){
+  document.querySelectorAll('.chars .cbtn').forEach(b=>{
+    // アドバイザー行だけ処理
+  });
+  S.advisorState=S.advisorState||{};
+  S.advisorState.selectedAdvisor=name;
+  // ハイライト
+  btn.parentElement.querySelectorAll('.cbtn').forEach(b=>b.classList.remove('sel'));
+  btn.classList.add('sel');
+  checkBoot();
+}
+
+// コマンダー名チェック
+function checkBoot(){
+  const nm=document.getElementById('cmdName');
+  const btn=document.getElementById('bootBtn');
+  if(nm&&btn){
+    const v=nm.value.trim();
+    btn.disabled=v.length<2;
+    const emojis=['👤','⚔️','🛸','🌌','🎯','💫'];
+    const ei=Math.floor(v.length/3)%emojis.length;
+    const eEl=document.getElementById('cmd_emoji');
+    if(eEl)eEl.textContent=v.length>=2?emojis[ei]:'👤';
+  }
+}
+
+function renderGovHistory(){
+  const el=document.getElementById('govHist');
+  const sub=document.getElementById('gp_sub');
+  const passedCount=S.govHistory.filter(r=>r.passed).length;
+  sub.textContent=`✓ ${passedCount}件可決  ✗ ${S.govHistory.length-passedCount}件否決`;
+  el.innerHTML='';
+
+  if(S.govHistory.length===0){
+    el.innerHTML='<div style="font-size:7px;color:var(--dim);text-align:center;padding:24px 8px;line-height:2">📋 ガバナンス提案待機中...<br><span style="color:rgba(0,255,136,.4)">委任を増やすと<br>YES票率が上がる</span></div>';
+    return;
+  }
+
+  S.govHistory.forEach((rec,idx)=>{
+    const{prop,passed,yesP,tvlGain,decGain,decBefore,time}=rec;
+    const contribPct=passed?Math.min(Math.round((decGain/500)*100*3),99):0;
+
+    const card=document.createElement('div');
+    card.className='acard '+(passed?'pass':'fail');
+
+    // ── HEADER (常時表示) ──
+    const hdr=document.createElement('div');
+    hdr.className='acard-header';
+    hdr.innerHTML=`
+      <span style="font-size:15px;line-height:1">${prop.ico||'📋'}</span>
+      <div style="flex:1;min-width:0">
+        <div style="font-family:var(--orb);font-size:7px;letter-spacing:1px;
+          color:${passed?'var(--g)':'var(--r)'}">
+          ${passed?'✓ PASSED':'✗ REJECTED'}
+        </div>
+        <div style="font-family:var(--orb);font-size:9px;color:#fff;
+          white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:700">
+          ${prop.nm}
+        </div>
+        <div style="display:flex;gap:4px;margin-top:3px;flex-wrap:wrap;">
+          ${passed
+            ? `<span style="font-family:var(--orb);font-size:8px;font-weight:700;color:var(--r);background:rgba(255,51,85,.1);padding:1px 5px;border:1px solid rgba(255,51,85,.3)">支出₳${fmtShort(rec.treasurySpent)}</span>
+               <span style="font-family:var(--orb);font-size:8px;font-weight:700;color:var(--g);background:rgba(0,255,136,.08);padding:1px 5px;border:1px solid rgba(0,255,136,.3)">収入+$${fmtShort(tvlGain)}</span>`
+            : `<span style="font-size:6px;color:var(--r)">YES ${yesP}% — 否決</span>`
+          }
+        </div>
+      </div>
+      <span class="acard-chevron">▼</span>`;
+    card.appendChild(hdr);
+
+    // ── DETAIL (折りたたみ) ──
+    const det=document.createElement('div');
+    det.className='acard-detail';
+    det.innerHTML=`
+<div class="acard-scan"></div>
+<div style="padding:0 10px 4px;font-size:7px;color:rgba(0,255,136,.55);
+  line-height:1.5;border-bottom:1px solid var(--brd)">
+  ${prop.achv?.detail||prop.dsc}
+</div>
+<div style="padding:7px 10px">
+  <div class="acard-stats">
+    <div class="astat">
+      <span class="astat-val">${passed?'+$'+fmt(tvlGain):'—'}</span>
+      <span class="astat-lbl">TVL増加</span>
+    </div>
+    <div class="astat">
+      <span class="astat-val">${passed?'+'+decGain:'—'}</span>
+      <span class="astat-lbl">DEC+</span>
+    </div>
+    <div class="astat">
+      <span class="astat-val" style="color:${yesP>50?'var(--g)':'var(--r)'}">${yesP}%</span>
+      <span class="astat-lbl">YES票</span>
+    </div>
+    <div class="astat">
+      <span class="astat-val">${passed?'₳'+fmt(rec.treasurySpent):'—'}</span>
+      <span class="astat-lbl">予算執行</span>
+    </div>
+  </div>
+  <div style="margin:5px 0 4px">
+    <div style="display:flex;justify-content:space-between;font-size:6px;
+      color:var(--dim);margin-bottom:2px;font-family:var(--orb)">
+      <span>YES ${yesP}%</span><span>NO ${100-yesP}%</span>
+    </div>
+    <div style="height:5px;background:rgba(255,255,255,.05);border-radius:1px;overflow:hidden">
+      <div style="height:100%;width:${yesP}%;
+        background:${yesP>50?'linear-gradient(90deg,#00cc66,#00ffee)':'linear-gradient(90deg,#ff3355,#ff8855)'}"></div>
+    </div>
+  </div>
+  <div class="acard-contrib">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+      <div class="acard-contrib-lbl">▸ 分散化への貢献度</div>
+      <div class="acard-contrib-pct">${contribPct}%</div>
+    </div>
+    <div class="acard-contrib-bar">
+      <div class="acard-contrib-fill" style="width:${contribPct}%"></div>
+    </div>
+    <div style="font-size:6px;color:var(--dim);margin-top:3px;text-align:right">
+      ${passed?'DEC: '+decBefore+' → '+(decBefore+decGain):'変化なし'}
+    </div>
+  </div>
+</div>
+<div class="acard-time">${time} 実施</div>`;
+    card.appendChild(det);
+
+    // クリックで展開/折りたたみ
+    card.onclick=()=>{ card.classList.toggle('open'); };
+
+    // 最新カード: 自動展開 + スポーンアニメ
+    if(idx===0){
+      card.classList.add('open','spawn-burst');
+    }
+    el.appendChild(card);
+  });
+  el.scrollTop=0;
+}
+
+// ═══════════════════════════════════════════
+// LEVEL UP
+// ═══════════════════════════════════════════
+function showLvl(){
+  document.getElementById('lv_nm').textContent=LEVELS[S.cardano.lvl].nm;
+  document.getElementById('lvlModal').classList.add('on');
+  S.cardano.delegations.forEach(dl=>fireLaser(dl.idx,'rgba(255,200,0,'));
+}
+function closeLvl(){document.getElementById('lvlModal').classList.remove('on');}
+
+// ═══════════════════════════════════════════
+// UI UPDATES
+// ═══════════════════════════════════════════
+function updateHUD(){
+  // コマンダー名 (名前があれば優先)
+  const cmdEl=document.getElementById('h_char');
+  if(cmdEl)cmdEl.textContent=S.commanderName||(CHAR_LBL[S.charType]||'COMMANDER');
+  const isC=S.chain==='Cardano';
+  document.getElementById('h_dec').textContent=isC?S.cardano.decScore:'—';
+  const decP2=isC?Math.min(S.cardano.decScore/500,1):0;
+  const fmLbl=['HIERARCHY','FORMING...','RING★','FULL RING★★'];
+  const fmIdx=decP2<.15?0:decP2<.5?1:decP2<.85?2:3;
+  const decEl=document.getElementById('h_dec');
+  decEl.style.color=fmIdx===0?'var(--r)':fmIdx===1?'var(--a)':fmIdx===2?'var(--c)':'var(--g)';
+  // Ring formation label in tier display
+  const tierEl=document.getElementById('h_rnk');
+  if(isC&&decP2>0){
+    tierEl.textContent=LEVELS[S.cardano.lvl].lbl+' | '+fmLbl[fmIdx];
+  }
+  document.getElementById('h_rnk').textContent=LEVELS[S.cardano.lvl].lbl;
+  const lv=LEVELS[S.cardano.lvl],nxt=LEVELS[Math.min(S.cardano.lvl+1,LEVELS.length-1)];
+  const xpP=S.cardano.lvl>=LEVELS.length-1?100:Math.min((S.cardano.xp-lv.min)/(nxt.min-lv.min)*100,100);
+  document.getElementById('xp_bar').style.width=xpP+'%';
+  document.getElementById('xp_lv').textContent='LV.'+(S.cardano.lvl+1);
+  document.getElementById('xp_dt').textContent=S.cardano.xp+'/'+nxt.min+'XP';
+  const m=calcM(getDreps());
+  const nak=isC?m.nak:NAK_BASE[S.chain]||m.nak;
+  const gini=isC?m.gini:GINI_BASE[S.chain]||m.gini;
+  const hnak=document.getElementById('h_nak');
+  hnak.textContent=nak+(S.liveMode&&S.chain==='Cardano'?' ★':'');
+  hnak.style.color=nak>=15?'var(--g)':nak>=5?'var(--a)':'var(--r)';
+  const hgin=document.getElementById('h_gin');
+  hgin.textContent=gini.toFixed(2)+(S.liveMode&&S.chain==='Cardano'?' ★':'');
+  hgin.style.color=gini<.4?'var(--g)':gini<.6?'var(--a)':'var(--r)';
+}
+function updateBars(){
+  const m=calcM(getDreps());
+  const isC=S.chain==='Cardano';
+  const nak=isC?m.nak:NAK_BASE[S.chain]||m.nak;
+  const gini=isC?m.gini:GINI_BASE[S.chain]||m.gini;
+  const facs=Object.values(S.cardano.facilities).reduce((s,f)=>s+f.length,0);
+  sbar('pb_tvl','pv_tvl',Math.min(S.eco.tvl/2e11*100,100),'$'+fmt(S.eco.tvl));
+  sbar('pb_trs','pv_trs',Math.min(S.eco.treasury/2e10*100,100),'₳'+fmt(S.eco.treasury));
+  sbar('pb_rev','pv_rev',Math.min(S.eco.rev/1e7*100,100),'₳'+fmt(S.eco.rev));
+  sbar('pb_dec','pv_dec',Math.min(S.cardano.decScore/500*100,100),S.cardano.decScore.toString());
+  sbar('pb_nak','pv_nak',Math.min(nak/50*100,100),nak.toString());
+  const gp=Math.max(0,(1-gini)*100);
+  sbar('pb_gin','pv_gin',gp,gini.toFixed(2));
+  const gb=document.getElementById('pb_gin');
+  if(gb)gb.style.background=gini<.4?'linear-gradient(90deg,#00ff88,#00cc66)':gini<.6?'linear-gradient(90deg,#ffaa00,#ff8800)':'linear-gradient(90deg,#f43f5e,#cc0022)';
+  sbar('pb_fac','pv_fac',Math.min(facs/20*100,100),facs+'棟');
+}
+function sbar(bid,vid,pct,txt){
+  const b=document.getElementById(bid),v=document.getElementById(vid);
+  if(b)b.style.width=Math.max(.3,pct)+'%';if(v)v.textContent=txt;
+}
+function updateStatus(){
+  const data=getDreps();
+  const el=document.getElementById('statusList');el.innerHTML='';
+  const items=[];
+  if(S.chain!=='Cardano'){
+    items.push({t:'info',h:'READ-ONLY VIEW',b:S.chain+'のガバナンス構造を観察中'});
+    const gini=GINI_BASE[S.chain]||.5;
+    items.push({t:gini>.7?'warn':'cau',h:'GINI: '+gini.toFixed(2),b:gini>.7?'高集中度。分散化が急務。':'中程度の集中。改善余地あり。'});
+    items.push({t:'info',h:'NAK: '+(NAK_BASE[S.chain]||'?'),b:'Cardanoに切替して向上させよ。'});
+  }else{
+    if(S.cardano.delegations.length===0){items.push({t:'info',h:'NO DEPLOYMENTS',b:'惑星にホバーして委任ターゲット選択'});}
+    else{
+      const tot=S.cardano.delegations.reduce((s,d)=>s+d.ada,0);
+      items.push({t:'ok',h:'DEPLOYED',b:`₳${fmt(tot)} 展開中`});
+      const ia=S.cardano.delegations.filter(d=>data[d.idx]&&data[d.idx].ina>60);
+      if(ia.length)items.push({t:'warn',h:'INACTIVE TARGET',b:`${data[ia[0].idx].n} ${data[ia[0].idx].ina}日未投票`});
+      const hw=S.cardano.delegations.filter(d=>data[d.idx]&&data[d.idx].wp>70);
+      if(hw.length)items.push({t:'warn',h:'WHALE',b:`${data[hw[0].idx].n} クジラ${data[hw[0].idx].wp}%`});
+      const gd=S.cardano.delegations.filter(d=>data[d.idx]&&data[d.idx].wp<25);
+      if(gd.length>=2)items.push({t:'ok',h:'OPTIMAL SPREAD',b:'優良DRepに分散委任！XP継続中'});
+      if(S.cardano.delegations.length>=3)items.push({t:'ok',h:'FLEET DEPLOYED',b:'3+DRep展開中！銀河守護任務遂行'});
+    }
+  }
+  items.slice(0,4).forEach(it=>{
+    const d=document.createElement('div');d.className='si '+it.t;
+    d.innerHTML=`<div class="sih">${it.h}</div><div class="sib">${it.b}</div>`;el.appendChild(d);
+  });
+  const chips=document.getElementById('delChips');chips.innerHTML='';
+  if(S.chain==='Cardano'&&S.cardano.delegations.length>0){
+    S.cardano.delegations.forEach(dl=>{
+      const d=data[dl.idx];if(!d)return;
+      const div=document.createElement('div');div.className='dchip';
+      const c=pcol(d);
+      div.innerHTML=`<div style="width:5px;height:5px;border-radius:50%;background:rgb(${c});flex-shrink:0"></div><div class="dcnm">${d.em} ${d.n}</div><div class="dcada">₳${fmt(dl.ada)}</div>`;
+      chips.appendChild(div);
+    });
+  }else if(S.chain==='Cardano'){
+    chips.innerHTML='<div style="font-size:7px;color:var(--dim);text-align:center;padding:6px">NO ACTIVE DEPLOYMENTS</div>';
+  }
+}
+function updateAll(){updateHUD();updateBars();updateStatus();updateChainTabs();}
+
+// ═══════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════
+let _tt=null;
+function toast(msg,type='ok'){
+  const el=document.getElementById('toast');el.textContent=msg;
+  el.className='toast '+type;void el.offsetWidth;el.classList.add('on');
+  if(_tt)clearTimeout(_tt);_tt=setTimeout(()=>el.classList.remove('on'),4500);
+}
+
+// ═══════════════════════════════════════════
+// BOOT / LAUNCH
+// ═══════════════════════════════════════════
+function selChar(t,el){
+  S.charType=t;
+  document.querySelectorAll('.cbtn').forEach(b=>b.classList.remove('sel'));
+  el.classList.add('sel');document.getElementById('bootBtn').disabled=false;
+}
+// ═══════════════════════════════════════════
+// ECONOMY MODAL
+// ═══════════════════════════════════════════
+function openEcoModal(){
+  const m=calcM(getDreps());
+  const isC=S.chain==='Cardano';
+  const nak=isC?m.nak:(NAK_BASE[S.chain]||m.nak);
+  const gini=isC?m.gini:(GINI_BASE[S.chain]||m.gini);
+  const facs=Object.values(S.cardano.facilities).reduce((s,f)=>s+f.length,0);
+  const dreps=S.cardano.dreps.length;
+  const cards=[
+    {cls:'tvl',  lbl:'TOTAL VALUE LOCKED',  val:'$'+fmt(S.eco.tvl),   pct:Math.min(S.eco.tvl/2e11*100,100),  sub:'分散化施設の累積ロック量', trend:'+'+fmt(facs*2800000)+'/tick'},
+    {cls:'trs',  lbl:'TREASURY BALANCE',    val:'₳'+fmt(S.eco.treasury),pct:Math.min(S.eco.treasury/2e10*100,100),sub:'ガバナンス予算残高', trend:'TVLの0.013%/tick還流'},
+    {cls:'rev',  lbl:'CUMUL. CHAIN REVENUE',val:'₳'+fmt(S.eco.rev),   pct:Math.min(S.eco.rev/1e7*100,100),   sub:'委任×施設の累積収益', trend:'+'+fmt((S.cardano.delegations.length*150+facs*100))+'/tick'},
+    {cls:'dec',  lbl:'DEC. SCORE',          val:S.cardano.decScore,   pct:Math.min(S.cardano.decScore/500*100,100),sub:'分散化の進捗 (500で完全)', trend:S.cardano.decScore<500?'RING形成中':'★ FULL RING達成！'},
+    {cls:'nak',  lbl:'NAKAMOTO COEFF.',      val:nak,                  pct:Math.min(nak/50*100,100),           sub:'33%阻止に必要なDRep数', trend:nak<5?'⚠ 低い':nak<15?'普通':'✓ 良好'},
+    {cls:'gin',  lbl:'GINI INDEX',           val:gini.toFixed(3),      pct:Math.max(0,(1-gini)*100),           sub:'低いほど平等 (0=完全平等)', trend:gini<.4?'✓ 優良':gini<.6?'普通':'⚠ 集中'},
+    {cls:'fac',  lbl:'TOTAL FACILITIES',     val:facs+'棟',            pct:Math.min(facs/20*100,100),          sub:'建設済み施設数 (最大20)', trend:'TVL +'+fmt(facs*3e6)+'/tick'},
+    {cls:'drp',  lbl:'ACTIVE DREPs',         val:dreps+'体',           pct:Math.min(dreps/30*100,100),         sub:'現在の惑星数 (収益で増加)', trend:'収益マイルストーンで増加'},
+  ];
+  const body=document.getElementById('emBody');
+  body.innerHTML=cards.map(cd=>`
+    <div class="emcard ${cd.cls}">
+      <div class="em-lbl">${cd.lbl}</div>
+      <div class="em-val">${cd.val}</div>
+      <div class="em-bar"><div class="em-fill" style="width:${cd.pct.toFixed(1)}%"></div></div>
+      <div class="em-sub">${cd.sub}</div>
+      <div class="em-trend ${cd.trend.includes('⚠')?'dn':'up'}">${cd.trend}</div>
+    </div>`).join('');
+  document.getElementById('ecoModal').classList.add('on');
+}
+function closeEcoModal(){
+  document.getElementById('ecoModal').classList.remove('on');
+}
+
+function launch(){
+  // コマンダー名取得
+  const nmEl=document.getElementById('cmdName');
+  S.commanderName=(nmEl&&nmEl.value.trim())||'COMMANDER';
+
+  // Full reset
+  S.chain='Cardano';S.af=0;S.voteActive=false;S.hovIdx=-1;S.dpMode='dep';
+  if(S.liveMode){ deactivateLiveMode(); }
+  S.liveMode=false; S.liveData={dreps:[],lastFetch:0,loading:false,error:null,networkTotals:null};
+  if(window._liveRefresh){clearInterval(window._liveRefresh);window._liveRefresh=null;}
+  S.bubbles=[];S.lasers=[];S.flows=[];S.beams=[];
+  S.govHistory=[];S.govOpen=false;S.newVoteCount=0;_dynIdx=0;S.selectedIdx=-1;
+  S.govStats={totalSpend:0,totalEarn:0,totalTvl:0,history:[]};
+  S.eco={rev:12400,treasury:1240000000,tvl:890000000};
+  S.l1=L1_BASE.map(d=>({...d}));S.l1cool=0;
+  S.cardano={
+    dreps:CARDANO_BASE.map(d=>({...d,bcpStopped:false,bcpStoppedAt:null})),
+    delegations:[],facilities:{},decScore:0,xp:0,lvl:0,extraR:{},spawned:0,
+    lastRevMilestone:0,
+  };
+  CARDANO_BASE.forEach((_,i)=>{S.cardano.facilities[i]=[];});
+
+  // アドバイザー状態リセット
+  S.advisorState={
+    activeTab: S.advisorState?.selectedAdvisor||'byron',
+    panelOpen:true,   // 起動時は開いた状態
+    logBuffer:[],
+    lastPhaseIdx:0,
+    unconsciousTimer:0,
+    statusFrame:0,
+    selectedAdvisor: S.advisorState?.selectedAdvisor||'byron',
+  };
+
+  document.getElementById('govPanel').classList.remove('open');
+  document.getElementById('gpbadge').classList.remove('on');
+  document.getElementById('govHist').innerHTML='';
+  document.getElementById('gp_sub').textContent='可決履歴 · スクロールで確認';
+  document.getElementById('bootScr').classList.remove('on');
+  document.getElementById('game').classList.add('on');
+
+  // コマンダー名をHUDに反映
+  const charEl=document.getElementById('h_char');
+  if(charEl)charEl.textContent=S.commanderName;
+
+  // アドバイザーパネル開く
+  document.getElementById('advisorPanel').classList.add('open');
+  document.getElementById('apToggle').classList.add('open');
+  document.getElementById('apToggle').style.left='200px';
+  switchAdvisorTab(S.advisorState.activeTab);
+
+  vp.x=0;vp.y=0;vp.sc=1;
+  // シールドセクター角度初期化
+  initShieldAngles();
+  setTimeout(()=>{
+    resize();initStars();initShieldAngles();
+    S.player={x:cx,y:cy,vx:0,vy:0,dragging:false,targetIdx:-1};
+    buildChainTabs();buildSelect();setMode('dep');
+    updateAll();
+    if(!_looping){_looping=true;loop();}
+    if(!_starLoop){_starLoop=true;starLoop();}
+    if(!_radarLoop){_radarLoop=true;radarLoop();}
+    if(window._gi)clearInterval(window._gi);
+    if(window._li)clearInterval(window._li);
+    if(window._ai)clearInterval(window._ai);
+    if(window._di)clearInterval(window._di);
+    window._gi=setInterval(geoTick,3000);
+    window._li=setInterval(growL1,5000);
+    window._ai=setInterval(()=>{tickUnconsciousAI();updatePhase();},8000);
+    window._di=setInterval(()=>{scanDecayDreps();scanGini();},15000);
+    setTimeout(triggerVote,20000);
+
+    // 初期セリフ
+    setTimeout(()=>{
+      addAdvisorLine('titan_decay',{name:'SleepingTitan',days:95});
+    },3000);
+    setTimeout(()=>{
+      const {nak}=calcM(S.cardano.dreps);
+      addAdvisorLine('nakamoto',{val:nak});
+    },7000);
+    setTimeout(()=>toast(`⚠️ SleepingTitan・GhostNode は非活動状態！委任を避けよ`,'warn'),2000);
+  },80);
+}
+function goBoot(){
+  document.getElementById('game').classList.remove('on');
+  document.getElementById('bootScr').classList.add('on');
+}
+</script>
+</body>
+</html>
